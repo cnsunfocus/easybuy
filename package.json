@@ -12,6 +12,8 @@
     "url": "https://github.com/kenberkeley/vue2-scaffold.git"
   },
   "dependencies": {
+    "echarts": "^3.8.5",
+    "element-ui": "^2.0.11",
     "vue": "^2.5.13",
     "vue-router": "^3.0.1"
   },

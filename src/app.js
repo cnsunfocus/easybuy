@@ -2,8 +2,11 @@
 import Vue from 'vue'
 import router from '@/routes/'
 import App from '@/components/App'
-
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
 /* eslint-disable no-new */
+Vue.use(ElementUI)
+
 new Vue({
   el: '#app',
   router,

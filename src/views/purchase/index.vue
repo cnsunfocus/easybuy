@@ -12,7 +12,7 @@
           <td>{{item.count}}</td>
           <td>{{item.price}}</td>
           <td>{{item.total}}</td>
-          <td>{{item.}}</td>
+          <td>{{item.vendor}}</td>
         </tr>
       </table>
     </div>
