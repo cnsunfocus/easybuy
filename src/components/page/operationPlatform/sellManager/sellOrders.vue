@@ -6,7 +6,7 @@
     </div>
     <div class="settingbox">
       <div class="settingtop clrfix">
-      
+
       <div class="ordersearchbox">
           <el-button type="primary" icon="search" @click='addOrder()'>下单</el-button>
       </div>
@@ -29,7 +29,7 @@
     <!-- 订单表格部分 -->
     <div class="ordedatabox">
       <el-table height='520'
-         :data="ordertableData"
+         :data="materialOptions"
          border
          style="width: 100%">
          <el-table-column
@@ -140,7 +140,7 @@ export default {
       curCount: 10,
       curPage: 1,
       // 表格数据
-      materialOptions: [{
+      materialNameOptions: [{
         number: 'GDa103219',
         time: '2014-12-08 16:07:06',
         ordergood: '共 3 款，12件',
@@ -191,48 +191,48 @@ export default {
         page: this.curPage
       })).then(res => {
         console.log(res.data.list)
-        this.materialOptions = res.data.list
-        for (var i = 0; i < this.materialOptions.length; i++) {
-          if (this.materialOptions[i].status < 2) {
-            this.materialOptions[i].transport = '待发货'
-          } else if (this.materialOptions[i].status >= 2 && this.materialOptions[i].status < 5) {
-            this.materialOptions[i].transport = '已发货'
-          } else if (this.materialOptions[i].status === 5) {
-            this.materialOptions[i].transport = '交易关闭'
-          } else if (this.materialOptions[i].status === 6) {
-            this.materialOptions[i].transport = '退货中'
-          } else if (this.materialOptions[i].status === 7) {
-            this.materialOptions[i].transport = '退货中'
-          } else if (this.materialOptions[i].status === 8) {
-            this.materialOptions[i].transport = '退款成功'
+        this.materialNameOptions = res.data.list
+        for (var i = 0; i < this.materialNameOptions.length; i++) {
+          if (this.materialNameOptions[i].status < 2) {
+            this.materialNameOptions[i].transport = '待发货'
+          } else if (this.materialNameOptions[i].status >= 2 && this.materialNameOptions[i].status < 5) {
+            this.materialNameOptions[i].transport = '已发货'
+          } else if (this.materialNameOptions[i].status === 5) {
+            this.materialNameOptions[i].transport = '交易关闭'
+          } else if (this.materialNameOptions[i].status === 6) {
+            this.materialNameOptions[i].transport = '退货中'
+          } else if (this.materialNameOptions[i].status === 7) {
+            this.materialNameOptions[i].transport = '退货中'
+          } else if (this.materialNameOptions[i].status === 8) {
+            this.materialNameOptions[i].transport = '退款成功'
           }
-          switch (this.materialOptions[i].status) {
+          switch (this.materialNameOptions[i].status) {
             case 0:
-              this.materialOptions[i].status = '待付款'
+              this.materialNameOptions[i].status = '待付款'
               break
             case 1:
-              this.materialOptions[i].status = '待发货'
+              this.materialNameOptions[i].status = '待发货'
               break
             case 2:
-              this.materialOptions[i].status = '待收货'
+              this.materialNameOptions[i].status = '待收货'
               break
             case 3:
-              this.materialOptions[i].status = '待评价'
+              this.materialNameOptions[i].status = '待评价'
               break
             case 4:
-              this.materialOptions[i].status = '已完成'
+              this.materialNameOptions[i].status = '已完成'
               break
             case 5:
-              this.materialOptions[i].status = '交易关闭'
+              this.materialNameOptions[i].status = '交易关闭'
               break
             case 6:
-              this.materialOptions[i].status = '退货中'
+              this.materialNameOptions[i].status = '退货中'
               break
             case 7:
-              this.materialOptions[i].status = '退款中'
+              this.materialNameOptions[i].status = '退款中'
               break
             case 8:
-              this.materialOptions[i].status = '退款成功'
+              this.materialNameOptions[i].status = '退款成功'
               break
           }
         }

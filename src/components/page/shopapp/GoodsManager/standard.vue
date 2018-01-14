@@ -79,7 +79,7 @@
             <el-button class="innerbtn" @click="delGroup">删除</el-button>
             <el-button class="innerbtn" @click='inneradd()'>添加规格</el-button>
           </div>
-       
+
         </div>
         <span slot="footer" class="dialog-footer">
           <el-button @click="standardDialogStatus = false">取 消</el-button>
@@ -120,7 +120,7 @@ export default {
       addStatus: false,
       editStatus: false,
       dialogTitle: '',
-      materialform: {
+      materialformdata: {
         code: '',
         name: '',
         othername: ''
@@ -159,9 +159,9 @@ export default {
       this.standardDialogStatus = true
       this.dialogTitle = '编辑规格组'
       console.log(index, row)
-      this.materialform.code = row.id
-      this.materialform.name = row.groupName
-      this.materialform.othername = row.describe
+      this.materialformdata.code = row.id
+      this.materialformdata.name = row.groupName
+      this.materialformdata.othername = row.describe
       this.innerData = []
       for (var i = 0; i < row.specifications.length; i++) {
         this.innerData.push({
@@ -205,9 +205,9 @@ export default {
       this.addStatus = true
       this.standardDialogStatus = true
       this.dialogTitle = '添加规格组'
-      this.materialform.code = '新建后系统自动生成'
-      this.materialform.name = ''
-      this.materialform.othername = ''
+      this.materialformdata.code = '新建后系统自动生成'
+      this.materialformdata.name = ''
+      this.materialformdata.othername = ''
       this.innerData = []
     },
     // 规格明细中添加规格
@@ -253,9 +253,9 @@ export default {
         // 新增状态
         var addStandardUrl = this.HOST + '/specification/specification'
         this.$http.post(addStandardUrl, qs.stringify({
-          groupName: this.materialform.name,
+          groupName: this.materialformdata.name,
           specifications: this.groupArr,
-          describe: this.materialform.othername
+          describe: this.materialformdata.othername
         })).then(res => {
           if (res.data.code === '0000') {
             console.log('新增成功')
@@ -276,10 +276,10 @@ export default {
         console.log('bianji', this.groupArr)
         var updateStandardUrl = this.HOST + 'specification/updateSpecification'
         this.$http.post(updateStandardUrl, qs.stringify({
-          id: this.materialform.code,
-          groupName: this.materialform.name,
+          id: this.materialformdata.code,
+          groupName: this.materialformdata.name,
           specifications: this.groupArr,
-          describe: this.materialform.othername
+          describe: this.materialformdata.othername
         })).then(res => {
           if (res.data.code === '0000') {
             this.$message({

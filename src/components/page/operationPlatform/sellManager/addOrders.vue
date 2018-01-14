@@ -6,7 +6,7 @@
     </div>
     <div class="settingbox">
       <div class="settingtop clrfix">
-      
+
       <div class="ordersearchbox">
           <el-button type="primary" icon="search" @click='addMaterial()'>添加原料</el-button>
       </div>
@@ -28,41 +28,41 @@
     <!-- 订单表格部分 -->
     <div class="ordedatabox">
       <el-table height='520'
-         :data="ordertableData"
+         :data="materialformdata"
          border
          style="width: 100%">
          <el-table-column
-           prop="tradeId"
+           prop="id"
            label="序号"
            width="180">
          </el-table-column>
          <el-table-column
-           prop="createdtime"
+           prop="name"
            label="名称"
            width="180">
          </el-table-column>
          <el-table-column
-           prop="ordergood"
+           prop="type"
            label="型号">
          </el-table-column>
          <el-table-column
-           prop="userName"
+           prop="unit"
            label="单位">
          </el-table-column>
          <el-table-column
-           prop="status"
+           prop="amount"
            label="数量">
          </el-table-column>
          <el-table-column
-           prop="transport"
+           prop="price"
            label="单价">
          </el-table-column>
           <el-table-column
-            prop="actualPrice"
+            prop="supplier"
             label="供应商">
           </el-table-column>
          <el-table-column
-           prop="operation"
+
            label="操作">
            <template scope="scope">
              <span class="bluebtn">删除</span>
@@ -89,31 +89,39 @@
               :title="dialogTitle"
               :visible.sync="materialDialogStatus"
               size="tiny">
-              <el-form ref="standardform" :model="materialform" label-width="100px">
+              <el-form ref="standardform" :model="materialformdata" label-width="100px">
                 <el-form-item label="名称">
-                  <el-input v-model="materialform.name" placeholder="请选择物料" ></el-input>
+                  <el-select v-model="materialformdata.name" placeholder="请选择物料">
+                    <el-option
+                      v-for="item in materialNameOptions"
+                      @click.native="provinceChange(item)"
+                      :key="item.value"
+                      :label="item.name"
+                      :value="item.value">
+                    </el-option>
+                  </el-select>
                 </el-form-item>
-                
+
                 <el-form-item label="型号">
-                  <el-input v-model="materialform.type" placeholder="请选择物料型号" ></el-input>
+                  <el-input v-model="materialformdata.type" placeholder="请选择物料型号" ></el-input>
                 </el-form-item>
-  
+
                 <el-form-item label="单位">
-                  <el-input v-model="materialform.unit" placeholder="请选择数量" ></el-input>
+                  <el-input v-model="materialformdata.unit" placeholder="请选择数量" ></el-input>
                 </el-form-item>
-  
+
                 <el-form-item label="数量">
-                  <el-input v-model="materialform.amount" placeholder="请选择物料数量" ></el-input>
+                  <el-input v-model="materialformdata.amount" placeholder="请选择物料数量" ></el-input>
                 </el-form-item>
-                
+
                 <el-form-item label="单价">
-                  <el-input v-model="materialform.price" placeholder="请填写单价" ></el-input>
+                  <el-input v-model="materialformdata.price" placeholder="请填写单价" ></el-input>
                 </el-form-item>
                 <el-form-item label="交货期">
-                  <el-input v-model="materialform.date" placeholder="请填写交货日期" ></el-input>
+                  <el-input v-model="materialformdata.date" placeholder="请填写交货日期" ></el-input>
                 </el-form-item>
                 <el-form-item label="备注">
-                  <el-input v-model="materialform.note" placeholder="请填写交货日期" ></el-input>
+                  <el-input v-model="materialformdata.note" placeholder="请填写交货日期" ></el-input>
                 </el-form-item>
               </el-form>
               <span slot="footer" class="dialog-footer">
@@ -132,7 +140,7 @@ export default {
     return {
       dialogTitle: '',
       materialDialogStatus: false,
-      materialform: {
+      materialformdata: [{
         code: '',
         id: '',
         name: '',
@@ -142,7 +150,7 @@ export default {
         price: '',
         date: '',
         note: ''
-      },
+      }],
       orderOptions: [{
         name: '待付款',
         value: 0
@@ -178,13 +186,27 @@ export default {
       curCount: 10,
       curPage: 1,
       // 表格数据
-      materialOptions: []
+      materialNameOptions: [],
+      materialTypeOptions: [],
+      materialSpOptions: [],
+      materialUnitOptions: []
     }
   },
   methods: {
+    allcConfirm () {
+      console.log('try to add a material')
+    },
     back () {
       this.$router.push({
         path: './sellorder'
+      })
+    },
+    nameChange (item) {
+      var materialUrl = this.HOST + '/material/' + item.value
+      this.materialTypeOptions
+      this.$http(materialUrl).then(res => {
+        this.materialTypeOptions = res.data.list
+        console.log(this.materialNameOptions)
       })
     },
     handleSizeChange (val) {
@@ -213,64 +235,64 @@ export default {
     },
     getMaterialList () {
       console.log('查询物料列表')
-      var materialUrl = this.HOST = '/material/list'
-      this.$http.get(materialUrl).then(res => {
-        this.materialOptions = res.data.list
-        console.log(this.materialOptions)
+      var materialUrl = this.HOST + '/material/list'
+      this.$http(materialUrl).then(res => {
+        this.materialNameOptions = res.data.list
+        console.log(this.materialNameOptions)
       })
     },
     getOrderList () {
       console.log('交易状态', this.chooseOrderItem)
       var orderListUrl = this.HOST + '/purchase_order/list'
-      this.$http.post(orderListUrl, qs.stringify({
+      this.$http(orderListUrl, qs.stringify({
         status: this.chooseOrderItem,
         tradeId: this.ordernum,
         count: this.curCount,
         page: this.curPage
       })).then(res => {
         console.log(res.data.list)
-        this.materialOptions = res.data.list
-        for (var i = 0; i < this.materialOptions.length; i++) {
-          if (this.materialOptions[i].status < 2) {
-            this.materialOptions[i].transport = '待发货'
-          } else if (this.materialOptions[i].status >= 2 && this.materialOptions[i].status < 5) {
-            this.materialOptions[i].transport = '已发货'
-          } else if (this.materialOptions[i].status === 5) {
-            this.materialOptions[i].transport = '交易关闭'
-          } else if (this.materialOptions[i].status === 6) {
-            this.materialOptions[i].transport = '退货中'
-          } else if (this.materialOptions[i].status === 7) {
-            this.materialOptions[i].transport = '退货中'
-          } else if (this.materialOptions[i].status === 8) {
-            this.materialOptions[i].transport = '退款成功'
+        this.materialNameOptions = res.data.list
+        for (var i = 0; i < this.materialNameOptions.length; i++) {
+          if (this.materialNameOptions[i].status < 2) {
+            this.materialNameOptions[i].transport = '待发货'
+          } else if (this.materialNameOptions[i].status >= 2 && this.materialNameOptions[i].status < 5) {
+            this.materialNameOptions[i].transport = '已发货'
+          } else if (this.materialNameOptions[i].status === 5) {
+            this.materialNameOptions[i].transport = '交易关闭'
+          } else if (this.materialNameOptions[i].status === 6) {
+            this.materialNameOptions[i].transport = '退货中'
+          } else if (this.materialNameOptions[i].status === 7) {
+            this.materialNameOptions[i].transport = '退货中'
+          } else if (this.materialNameOptions[i].status === 8) {
+            this.materialNameOptions[i].transport = '退款成功'
           }
-          switch (this.materialOptions[i].status) {
+          switch (this.materialNameOptions[i].status) {
             case 0:
-              this.materialOptions[i].status = '待付款'
+              this.materialNameOptions[i].status = '待付款'
               break
             case 1:
-              this.materialOptions[i].status = '待发货'
+              this.materialNameOptions[i].status = '待发货'
               break
             case 2:
-              this.materialOptions[i].status = '待收货'
+              this.materialNameOptions[i].status = '待收货'
               break
             case 3:
-              this.materialOptions[i].status = '待评价'
+              this.materialNameOptions[i].status = '待评价'
               break
             case 4:
-              this.materialOptions[i].status = '已完成'
+              this.materialNameOptions[i].status = '已完成'
               break
             case 5:
-              this.materialOptions[i].status = '交易关闭'
+              this.materialNameOptions[i].status = '交易关闭'
               break
             case 6:
-              this.materialOptions[i].status = '退货中'
+              this.materialNameOptions[i].status = '退货中'
               break
             case 7:
-              this.materialOptions[i].status = '退款中'
+              this.materialNameOptions[i].status = '退款中'
               break
             case 8:
-              this.materialOptions[i].status = '退款成功'
+              this.materialNameOptions[i].status = '退款成功'
               break
           }
         }
@@ -279,6 +301,7 @@ export default {
   },
   mounted () {
     this.getOrderList()
+    this.getMaterialList()
   }
 }
 </script>

@@ -22,7 +22,7 @@ def get_material():
     conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
                            charset=config.db_charset)
     cur = conn.cursor()
-    cur.execute('select prod_name, sp_id, code, unit,prod_gb_standard from t_product where prod_type="原料" and status = "有效"')
+    cur.execute('select distinct(prod_name) from t_product where prod_type="原料" and status = "有效"')
     results = cur.fetchall()
     ret_data = []
     for r in results:
@@ -41,9 +41,17 @@ def get_purchase_order():
                            charset=config.db_charset)
     cur = conn.cursor()
     cur.execute("select sp_name, code from t_supplier")
-    return 'Hello World!'
+    return cur.fetchall()
+
+@app.route('/api/trade/list')
+def get_trade_list():
+    conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
+                           charset=config.db_charset)
+    cur = conn.cursor()
+    cur.execute("select sp_name, code from t_supplier")
+    return cur.fetchall()
 
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=8089)
