@@ -95,9 +95,9 @@
                     <el-option
                       v-for="item in materialNameOptions"
                       @click.native="provinceChange(item)"
-                      :key="item.value"
+                      :key="item.code"
                       :label="item.name"
-                      :value="item.value">
+                      :value="item.code">
                     </el-option>
                   </el-select>
                 </el-form-item>
@@ -237,7 +237,7 @@ export default {
       console.log('查询物料列表')
       var materialUrl = this.HOST + '/material/list'
       this.$http(materialUrl).then(res => {
-        this.materialNameOptions = res.data.list
+        this.materialNameOptions = res.data
         console.log(this.materialNameOptions)
       })
     },
