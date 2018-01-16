@@ -61,9 +61,7 @@
             prop="supplier"
             label="供应商">
           </el-table-column>
-         <el-table-column
-
-           label="操作">
+         <el-table-column     label="操作">
            <template scope="scope">
              <span class="bluebtn">删除</span>
            </template>
@@ -94,24 +92,49 @@
                   <el-select v-model="materialformdata.name" placeholder="请选择物料">
                     <el-option
                       v-for="item in materialNameOptions"
-                      @click.native="provinceChange(item)"
-                      :key="item.code"
+                      @click.native="nameChange(item)"
+                      :key="item.name"
                       :label="item.name"
-                      :value="item.code">
+                      :value="item.name">
                     </el-option>
                   </el-select>
                 </el-form-item>
 
                 <el-form-item label="型号">
-                  <el-input v-model="materialformdata.type" placeholder="请选择物料型号" ></el-input>
+                  <el-select v-model="materialformdata.type" placeholder="请选择物料型号">
+                    <el-option
+                      v-for="item in materialTypeOptions"
+                      :key="item"
+                      :label="item"
+                      :value="item">
+                    </el-option>
+                  </el-select>
                 </el-form-item>
 
+                <el-form-item label="供应商">
+                  <el-select v-model="materialformdata.sp" placeholder="请选择供应商">
+                    <el-option
+                      v-for="item in materialSpOptions"
+                      :key="item"
+                      :label="item"
+                      :value="item">
+                    </el-option>
+                  </el-select>
+                </el-form-item>
+  
                 <el-form-item label="单位">
-                  <el-input v-model="materialformdata.unit" placeholder="请选择数量" ></el-input>
+                  <el-select v-model="materialformdata.unit" placeholder="请选择单位">
+                    <el-option
+                      v-for="item in materialUnitOptions"
+                      :key="item"
+                      :label="item"
+                      :value="item">
+                    </el-option>
+                  </el-select>
                 </el-form-item>
 
                 <el-form-item label="数量">
-                  <el-input v-model="materialformdata.amount" placeholder="请选择物料数量" ></el-input>
+                  <el-input v-model="materialformdata.amount" placeholder="请填写物料数量" ></el-input>
                 </el-form-item>
 
                 <el-form-item label="单价">
@@ -146,6 +169,7 @@ export default {
         name: '',
         type: '',
         unit: '',
+        sp: '',
         amount: 1,
         price: '',
         date: '',
@@ -202,10 +226,14 @@ export default {
       })
     },
     nameChange (item) {
-      var materialUrl = this.HOST + '/material/' + item.value
+      var materialUrl = this.HOST + '/material/' + item.name + '/detail'
       this.materialTypeOptions
       this.$http(materialUrl).then(res => {
-        this.materialTypeOptions = res.data.list
+        console.log('详情')
+        console.log(res.data)
+        this.materialTypeOptions = res.data['gb']
+        this.materialSpOptions = res.data['sp']
+        this.materialUnitOptions = res.data['unit']
         console.log(this.materialNameOptions)
       })
     },
@@ -235,7 +263,7 @@ export default {
     },
     getMaterialList () {
       console.log('查询物料列表')
-      var materialUrl = this.HOST + '/material/list'
+      var materialUrl = this.HOST + '/material'
       this.$http(materialUrl).then(res => {
         this.materialNameOptions = res.data
         console.log(this.materialNameOptions)
