@@ -29,7 +29,7 @@
     <!-- 订单表格部分 -->
     <div class="ordedatabox">
       <el-table height='520'
-         :data="materialOptions"
+         :data="materialNameOptions"
          border
          style="width: 100%">
          <el-table-column

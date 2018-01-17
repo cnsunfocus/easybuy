@@ -28,7 +28,7 @@
     <!-- 订单表格部分 -->
     <div class="ordedatabox">
       <el-table height='520'
-         :data="materialformdata"
+         :data="materialformdataList"
          border
          style="width: 100%">
          <el-table-column
@@ -61,9 +61,9 @@
             prop="supplier"
             label="供应商">
           </el-table-column>
-         <el-table-column     label="操作">
-           <template scope="scope">
-             <span class="bluebtn">删除</span>
+         <el-table-column label="操作">
+           <template slot-scope="scope">
+            <span class="bluebtn">删除</span>
            </template>
          </el-table-column>
        </el-table>
@@ -104,6 +104,7 @@
                   <el-select v-model="materialformdata.type" placeholder="请选择物料型号">
                     <el-option
                       v-for="item in materialTypeOptions"
+                      @click.native="typeChange(item)"
                       :key="item"
                       :label="item"
                       :value="item">
@@ -115,9 +116,9 @@
                   <el-select v-model="materialformdata.sp" placeholder="请选择供应商">
                     <el-option
                       v-for="item in materialSpOptions"
-                      :key="item"
-                      :label="item"
-                      :value="item">
+                      :key="item.sp_id"
+                      :label="item.sp_name"
+                      :value="item.sp_id">
                     </el-option>
                   </el-select>
                 </el-form-item>
@@ -126,25 +127,34 @@
                   <el-select v-model="materialformdata.unit" placeholder="请选择单位">
                     <el-option
                       v-for="item in materialUnitOptions"
-                      :key="item"
-                      :label="item"
-                      :value="item">
+                      :key="item.code"
+                      :label="item.desc"
+                      :value="item.code">
                     </el-option>
                   </el-select>
                 </el-form-item>
 
                 <el-form-item label="数量">
-                  <el-input v-model="materialformdata.amount" placeholder="请填写物料数量" ></el-input>
+                  <el-input type="number" step="100" v-model="materialformdata.amount" placeholder="请填写物料数量" ></el-input>
                 </el-form-item>
 
                 <el-form-item label="单价">
-                  <el-input v-model="materialformdata.price" placeholder="请填写单价" ></el-input>
+                  <el-input type="number" step="0.01"
+                            v-model="materialformdata.price"
+                            @change="checkNo(materialformdata.price)"
+                            onkeypress="return event.keyCode>=48&&event.keyCode<=57"
+                            placeholder="请填写单价"></el-input>
                 </el-form-item>
                 <el-form-item label="交货期">
-                  <el-input v-model="materialformdata.date" placeholder="请填写交货日期" ></el-input>
+                  <el-date-picker
+                    v-model="materialformdata.date"
+                    type="date"
+                    format="yyyy-MM-dd"
+                    placeholder="请选择交货日期">
+                  </el-date-picker>
                 </el-form-item>
                 <el-form-item label="备注">
-                  <el-input v-model="materialformdata.note" placeholder="请填写交货日期" ></el-input>
+                  <el-input v-model="materialformdata.note" placeholder="请填写备注信息" ></el-input>
                 </el-form-item>
               </el-form>
               <span slot="footer" class="dialog-footer">
@@ -156,14 +166,14 @@
 </template>
 
 <script>
-import qs from 'querystring'
+// import qs from 'querystring'
 import AMap from 'AMap'
 export default {
   data () {
     return {
       dialogTitle: '',
       materialDialogStatus: false,
-      materialformdata: [{
+      materialformdataList: [{
         code: '',
         id: '',
         name: '',
@@ -175,6 +185,18 @@ export default {
         date: '',
         note: ''
       }],
+      materialformdata: {
+        code: '',
+        id: '',
+        name: '',
+        type: '',
+        unit: '',
+        sp: '',
+        amount: 1,
+        price: '',
+        date: '',
+        note: ''
+      },
       orderOptions: [{
         name: '待付款',
         value: 0
@@ -226,17 +248,61 @@ export default {
       })
     },
     nameChange (item) {
-      var materialUrl = this.HOST + '/material/' + item.name + '/detail'
+      var materialUrl = encodeURI(this.HOST + '/material/' + item.name + '/standard')
       this.materialTypeOptions
       this.$http(materialUrl).then(res => {
-        console.log('详情')
+        this.materialTypeOptions = res.data
+      })
+    },
+    typeChange (item) {
+      var materialUrl = encodeURI(this.HOST + '/material/' + this.materialformdata.name + '/standard' + item)
+      this.materialTypeOptions
+      this.$http(materialUrl).then(res => {
         console.log(res.data)
-        this.materialTypeOptions = res.data['gb']
         this.materialSpOptions = res.data['sp']
         this.materialUnitOptions = res.data['unit']
         console.log(this.materialNameOptions)
       })
     },
+    checkNo (value) {
+      console.log('校验')
+//      let reg = /^[1-9]\d*$/
+//      if (value) {
+//        if (value > 999999 || new RegExp(reg).test(value) === false) {
+//          setTimeout(() => {
+//            this.searchForm.msel.mselTotalConsumTimes = ''
+//          }, 500)
+//        }
+//      }
+      value = value.replace(/[^\d.]/g, '')
+      value = value.replace(/^\./g, '')
+      value = value.replace(/\.{2,}/g, '.')
+      value = value.replace('.', '$#$').replace(/\./g, '').replace('$#$', '.')
+      value = value.replace(/^(\\-)*(\d+)\.(\d\d).*$/, '$1$2.$3')
+      this.materialformdata.price = value
+    },
+//    myNumberic (obj) {
+//    function onlyNumber1(input, n) {
+//  var ret = "";
+//  var number =input.value;
+//  if (number != ""&& number!=null&&number!="0") {
+//    var unit = "仟佰拾亿仟佰拾万仟佰拾元角分",
+//      str = "";
+//    number += "00";
+//    var point = number.indexOf('.');
+//    if (point >= 0) {
+//      number = number.substring(0, point) + number.substr(point + 1, 2);
+//    }
+//    unit = unit.substr(unit.length - number.length);
+//    for (var i = 0; i < number.length; i++) {
+//      str += '零壹贰叁肆伍陆柒捌玖'.charAt(number.charAt(i)) + unit.charAt(i);
+//    }
+//    ret = str.replace(/零(仟|佰|拾|角)/g, "零").replace(/(零)+/g, "零").replace(/零(万|亿|元)/g, "$1").replace(/(亿)万|(拾)/g, "$1$2").replace(/^元零?|零分/g, "").replace(/元$/g, "元") + "整";
+//  }
+//  var a = document.getElementsByName("MoneyCapital")[0].id;
+//  document.getElementById(a).value=ret;
+//  }
+//    },
     handleSizeChange (val) {
       this.curCount = val
       this.getOrderList()
@@ -271,64 +337,63 @@ export default {
     },
     getOrderList () {
       console.log('交易状态', this.chooseOrderItem)
-      var orderListUrl = this.HOST + '/purchase_order/list'
-      this.$http(orderListUrl, qs.stringify({
-        status: this.chooseOrderItem,
-        tradeId: this.ordernum,
-        count: this.curCount,
-        page: this.curPage
-      })).then(res => {
-        console.log(res.data.list)
-        this.materialNameOptions = res.data.list
-        for (var i = 0; i < this.materialNameOptions.length; i++) {
-          if (this.materialNameOptions[i].status < 2) {
-            this.materialNameOptions[i].transport = '待发货'
-          } else if (this.materialNameOptions[i].status >= 2 && this.materialNameOptions[i].status < 5) {
-            this.materialNameOptions[i].transport = '已发货'
-          } else if (this.materialNameOptions[i].status === 5) {
-            this.materialNameOptions[i].transport = '交易关闭'
-          } else if (this.materialNameOptions[i].status === 6) {
-            this.materialNameOptions[i].transport = '退货中'
-          } else if (this.materialNameOptions[i].status === 7) {
-            this.materialNameOptions[i].transport = '退货中'
-          } else if (this.materialNameOptions[i].status === 8) {
-            this.materialNameOptions[i].transport = '退款成功'
-          }
-          switch (this.materialNameOptions[i].status) {
-            case 0:
-              this.materialNameOptions[i].status = '待付款'
-              break
-            case 1:
-              this.materialNameOptions[i].status = '待发货'
-              break
-            case 2:
-              this.materialNameOptions[i].status = '待收货'
-              break
-            case 3:
-              this.materialNameOptions[i].status = '待评价'
-              break
-            case 4:
-              this.materialNameOptions[i].status = '已完成'
-              break
-            case 5:
-              this.materialNameOptions[i].status = '交易关闭'
-              break
-            case 6:
-              this.materialNameOptions[i].status = '退货中'
-              break
-            case 7:
-              this.materialNameOptions[i].status = '退款中'
-              break
-            case 8:
-              this.materialNameOptions[i].status = '退款成功'
-              break
-          }
-        }
-      })
+//      var orderListUrl = this.HOST + '/purchase_order/list'
+//      this.$http(orderListUrl, qs.stringify({
+//        status: this.chooseOrderItem,
+//        tradeId: this.ordernum,
+//        count: this.curCount,
+//        page: this.curPage
+//      })).then(res => {
+//        console.log(res.data.list)
+//        this.materialNameOptions = res.data.list
+//        for (var i = 0; i < this.materialNameOptions.length; i++) {
+//          if (this.materialNameOptions[i].status < 2) {
+//            this.materialNameOptions[i].transport = '待发货'
+//          } else if (this.materialNameOptions[i].status >= 2 && this.materialNameOptions[i].status < 5) {
+//            this.materialNameOptions[i].transport = '已发货'
+//          } else if (this.materialNameOptions[i].status === 5) {
+//            this.materialNameOptions[i].transport = '交易关闭'
+//          } else if (this.materialNameOptions[i].status === 6) {
+//            this.materialNameOptions[i].transport = '退货中'
+//          } else if (this.materialNameOptions[i].status === 7) {
+//            this.materialNameOptions[i].transport = '退货中'
+//          } else if (this.materialNameOptions[i].status === 8) {
+//            this.materialNameOptions[i].transport = '退款成功'
+//          }
+//          switch (this.materialNameOptions[i].status) {
+//            case 0:
+//              this.materialNameOptions[i].status = '待付款'
+//              break
+//            case 1:
+//              this.materialNameOptions[i].status = '待发货'
+//              break
+//            case 2:
+//              this.materialNameOptions[i].status = '待收货'
+//              break
+//            case 3:
+//              this.materialNameOptions[i].status = '待评价'
+//              break
+//            case 4:
+//              this.materialNameOptions[i].status = '已完成'
+//              break
+//            case 5:
+//              this.materialNameOptions[i].status = '交易关闭'
+//              break
+//            case 6:
+//              this.materialNameOptions[i].status = '退货中'
+//              break
+//            case 7:
+//              this.materialNameOptions[i].status = '退款中'
+//              break
+//            case 8:
+//              this.materialNameOptions[i].status = '退款成功'
+//              break
+//          }
+//        }
+//      })
     }
   },
   mounted () {
-    this.getOrderList()
     this.getMaterialList()
   }
 }

@@ -32,28 +32,63 @@ def get_material():
     ret_data.append(data)
   return json.dumps(ret_data)
 
-@app.route('/api/material/<string:name>/list')
-def get_material_detail(name):
+
+@app.route('/api/material/<string:name>/standard')
+def get_standard_list(name):
   conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
                          charset=config.db_charset)
   cur = conn.cursor()
-  cur.execute('select prod_gb_standard, sp_name, sp_id, unit from t_product, t_supplier'
-              ' where t_supplier.id = t_product.sp_id and prod_type="原料" and status = "有效" and name = "%s"' % name)
-  results = cur.fetchall()
-  ret_data = {}
-  gb_data = []
-  sp_data = []
-  unit_data = []
+  cur.execute("select DISTINCT(prod_gb_standard) from t_product p "
+              "where and p.prod_type='%s' and p.status = '%s' and p.prod_name = '%s'"
+              % (u"原料", u"有效", name))
 
+  results = cur.fetchall()
+  gb_data = []
 
   for r in results:
     gb_data.append(r[0])
-    sp_data.append({"sp_name":r[1], "sp_id":r[2]})
-    unit_data.append(r[3])
 
-  ret_data["gb"] = gb_data
-  ret_data["sp"] = sp_data
-  ret_data["unit"] = unit_data
+  return json.dumps(gb_data)
+
+
+@app.route('/api/material/<string:name>/standard/<string:standard>')
+def get_supplier_list(name, standard):
+  conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
+                         charset=config.db_charset)
+  cur = conn.cursor()
+  cur.execute(
+    "select s.sp_name, sp_id, p.unit, u.desc from t_product p, t_supplier s, t_unit u "
+    "where s.id = p.sp_id and p.prod_type='%s' and p.status = '%s' "
+    "and p.prod_name = '%s' and prod_gb_standard = '%s' and u.code = p.unit"
+    % (u"原料", u"有效", name, standard))
+
+  results = cur.fetchall()
+  ret_data = {}
+  sp_data = []
+  unit_data = []
+
+  for r in results:
+    sp_data.append({"sp_name": r[1], "sp_id": r[2]})
+    unit_data.append({"code": r[3], "desc": r[4]})
+
+  tmp = {}
+  sp_final_data = []
+  for sp in sp_data:
+    if tmp.has_key(sp['sp_id']):
+      continue
+    tmp[sp['sp_id']] = sp['sp_name']
+    sp_final_data.append(sp)
+
+  tmp = {}
+  unit_final_data = []
+  for sp in unit_data:
+    if tmp.has_key(sp['code']):
+      continue
+    tmp[sp['code']] = sp['desc']
+    unit_final_data.append(sp)
+
+  ret_data["sp"] = sp_final_data
+  ret_data["unit"] = unit_final_data
 
   return json.dumps(ret_data)
 
