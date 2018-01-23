@@ -2,22 +2,24 @@
   <div class="sellorders">
     <div class="topbar">
       <span class="shortline"></span>
-      <span class="title">采购订单</span>
+      <span class="title">创建订单</span>
     </div>
     <div class="settingbox">
       <div class="settingtop clrfix">
 
       <div class="ordersearchbox">
           <el-button type="primary" icon="search" @click='addMaterial()'>添加原料</el-button>
+          <el-button type="primary" icon="search" @click='order()'>确认下单</el-button>
       </div>
         <div class="choosestatus">
           <!-- 订单状态选择框 -->
-          <el-select v-model="chooseOrderItem" placeholder="订单状态">
+          <el-select v-model="supplier"  placeholder="供应商列表">
             <el-option
-            v-for="item in orderOptions"
-            :key="item.value"
-            :label="item.name"
-            :value="item.value">
+            @click.native="clearOrder(item)"
+            v-for="item in supplierOptions"
+            :key="item.sp_id"
+            :label="item.sp_name"
+            :value="item">
           </el-option>
         </el-select>
       </div>
@@ -25,61 +27,95 @@
         <el-button type="primary" class="addsort" icon="search" @click='back()'>返回</el-button>
       </div>
     </div>
-    <!-- 订单表格部分 -->
-    <div class="ordedatabox">
-      <el-table height='520'
-         :data="materialformdataList"
-         border
-         style="width: 100%">
-         <el-table-column
-           prop="id"
-           label="序号"
-           width="180">
-         </el-table-column>
-         <el-table-column
-           prop="name"
-           label="名称"
-           width="180">
-         </el-table-column>
-         <el-table-column
-           prop="type"
-           label="型号">
-         </el-table-column>
-         <el-table-column
-           prop="unit"
-           label="单位">
-         </el-table-column>
-         <el-table-column
-           prop="amount"
-           label="数量">
-         </el-table-column>
-         <el-table-column
-           prop="price"
-           label="单价">
-         </el-table-column>
-          <el-table-column
-            prop="supplier"
-            label="供应商">
-          </el-table-column>
-         <el-table-column label="操作">
-           <template slot-scope="scope">
-            <span class="bluebtn">删除</span>
-           </template>
-         </el-table-column>
-       </el-table>
-    </div>
-    <!-- 分页 -->
-        <div class="paginationbox">
-        <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="curPage"
-          :page-sizes="[10, 20]"
-          :page-size="curCount"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="400">
-        </el-pagination>
-      </div>
+    <div id="purchaseOrder">
+                <h1 align = "center">采购单</h1>
+                <br></br>
+                <div>
+                  <table width="100%" border="1" cellpadding="0" cellspacing="0" style= "border:1px solid #000000;border-right-color:#FF0000;">
+                     <tr style = "boder:1px">
+                       <td>订单号:</td>
+                       <td>{{printDialogTitle}}</td>
+                       <td>订单日期:</td>
+                       <td>{{printDialogTitle}}</td>
+                     </tr>
+                    <tr style = "boder:1px">
+                      <td>计划单:</td>
+                      <td>{{printDialogTitle}}</td>
+                      <td>订购方:</td>
+                      <td>南京柔科</td>
+                    </tr>
+                    <tr style = "boder:1px">
+                      <td>供应商:</td>
+                      <td>{{supplier.sp_name}}</td>
+                      <td>地址:</td>
+                      <td>南京柔科</td>
+                    </tr>
+                    <tr style = "boder:1px">
+                      <td>联系人:</td>
+                      <td>{{supplier.sp_contact}}</td>
+                      <td>联系人:</td>
+                      <td>史辉</td>
+                    </tr>
+                    <tr style = "boder:1px">
+                      <td>电话:</td>
+                      <td>{{supplier.sp_phone}}</td>
+                      <td>电话:</td>
+                      <td>南京柔科</td>
+                    </tr>
+                    <tr style = "boder:1px">
+                      <td>传真:</td>
+                      <td>{{printDialogTitle}}</td>
+                      <td>传真:</td>
+                      <td>南京柔科</td>
+                    </tr>
+                    <tr style = "boder:1px">
+                      <td  colspan="4">订购内容:</td>
+                    </tr>
+                    <tr style = "boder:1px">
+                      <td colspan="4">
+                        <table id="orderDetail" width="100%" border="1" cellpadding="0" cellspacing="0"
+                               style= "border:1px solid #000000;border-right-color:#FF0000;">
+                          <tr>
+                            <th>序号</th>
+                            <th>物料名称</th>
+                            <th>型号</th>
+                            <th>单位</th>
+                            <th>数量</th>
+                            <th>单价</th>
+                            <th>交货期</th>
+                            <th>备注</th>
+                          </tr>
+                          <tr v-for="(item, index) in materialformdataList">
+                            <td>{{index + 1}}</td>
+                            <td>{{item.name}}</td>
+                            <td>{{item.type}}</td>
+                            <td>{{item.unit.desc}}</td>
+                            <td>{{item.amount}}</td>
+                            <td>{{item.price}}</td>
+                            <td>{{item.date}}</td>
+                            <td>{{item.note}}</td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    <tr style = "boder:1px">
+                      <td align="left" colspan="4">
+                      <p>交易条款:</p>
+                        <p>一. 交期</p>
+                        <p>二. 品质</p>
+                        <p>三. 不良处理</p>
+                      </td>
+                    </tr>
+                  </table>
+                  <div id="orderFooter">
+                    <input type="text">采购: </input>
+                    <input type="text">审核: </input>
+                    <label>供应商(签章):</label>
+                  </div>
+                </div>
+                
+              </div>
+   
     </div>
 
             <!-- 添加规格组弹框 -->
@@ -112,24 +148,13 @@
                   </el-select>
                 </el-form-item>
 
-                <el-form-item label="供应商">
-                  <el-select v-model="materialformdata.sp" placeholder="请选择供应商">
-                    <el-option
-                      v-for="item in materialSpOptions"
-                      :key="item.sp_id"
-                      :label="item.sp_name"
-                      :value="item.sp_id">
-                    </el-option>
-                  </el-select>
-                </el-form-item>
-  
                 <el-form-item label="单位">
                   <el-select v-model="materialformdata.unit" placeholder="请选择单位">
                     <el-option
                       v-for="item in materialUnitOptions"
                       :key="item.code"
                       :label="item.desc"
-                      :value="item.code">
+                      :value="item">
                     </el-option>
                   </el-select>
                 </el-form-item>
@@ -158,9 +183,19 @@
                 </el-form-item>
               </el-form>
               <span slot="footer" class="dialog-footer">
-                      <el-button @click="materialDialogStatus = false">取 消</el-button>
                       <el-button type="primary" @click="allcConfirm">确 定</el-button>
+                      <el-button @click="materialDialogStatus = false">取 消</el-button>
               </span>
+            </el-dialog>
+
+            <el-dialog
+              :title="printDialogTitle"
+              :visible.sync="printDialogStatus"
+              size="tiny">
+              
+              <el-form ref="standardform" :model="materialformdata" label-width="100px">
+                <el-form-item></el-form-item>
+              </el-form>
             </el-dialog>
   </div>
 </template>
@@ -173,25 +208,16 @@ export default {
     return {
       dialogTitle: '',
       materialDialogStatus: false,
-      materialformdataList: [{
-        code: '',
-        id: '',
-        name: '',
-        type: '',
-        unit: '',
-        sp: '',
-        amount: 1,
-        price: '',
-        date: '',
-        note: ''
-      }],
+      printDialogTitle: '确认采购订单',
+      printDialogStatus: false,
+      supplier: {},
+      materialformdataList: [],
       materialformdata: {
         code: '',
         id: '',
         name: '',
         type: '',
         unit: '',
-        sp: '',
         amount: 1,
         price: '',
         date: '',
@@ -232,6 +258,7 @@ export default {
       curCount: 10,
       curPage: 1,
       // 表格数据
+      supplierOptions: [],
       materialNameOptions: [],
       materialTypeOptions: [],
       materialSpOptions: [],
@@ -239,7 +266,20 @@ export default {
     }
   },
   methods: {
+    order () {
+      this.printDialogStatus = true
+      console.log('下单')
+    },
+    getSupplierList () {
+      var materialUrl = encodeURI(this.HOST + '/suppliers')
+      this.$http(materialUrl).then(res => {
+        this.supplierOptions = res.data
+      })
+    },
     allcConfirm () {
+      this.materialformdataList.push(this.materialformdata)
+      this.materialDialogStatus = false
+      this.materialformdata = { 'amount': 1 }
       console.log('try to add a material')
     },
     back () {
@@ -247,19 +287,24 @@ export default {
         path: './sellorder'
       })
     },
+    clearOrder (item) {
+      alert('切换供应商将清空当前采购单')
+      this.materialformdataList = []
+      this.supplier = item
+    },
     nameChange (item) {
-      var materialUrl = encodeURI(this.HOST + '/material/' + item.name + '/standard')
-      this.materialTypeOptions
+      var materialUrl = encodeURI(this.HOST + '/material/' + item.name + '/supplier/' + this.supplier.sp_id + '/standard')
       this.$http(materialUrl).then(res => {
         this.materialTypeOptions = res.data
       })
     },
     typeChange (item) {
-      var materialUrl = encodeURI(this.HOST + '/material/' + this.materialformdata.name + '/standard' + item)
+      var materialUrl = encodeURI(this.HOST + '/material/' + this.materialformdata.name +
+        '/standard/' + item +
+        '/supplier/' + this.supplier.sp_id)
       this.materialTypeOptions
       this.$http(materialUrl).then(res => {
         console.log(res.data)
-        this.materialSpOptions = res.data['sp']
         this.materialUnitOptions = res.data['unit']
         console.log(this.materialNameOptions)
       })
@@ -313,8 +358,8 @@ export default {
       this.getOrderList()
       console.log(`当前页: ${val}`)
     },
-    // 添加机构
     addMaterial () {
+      this.getMaterialList()
       this.materialDialogStatus = true
       // 图片的还未进行处理
       // 渲染组件滞后 需要延时才能出来
@@ -329,11 +374,15 @@ export default {
     },
     getMaterialList () {
       console.log('查询物料列表')
-      var materialUrl = this.HOST + '/material'
+      var materialUrl = this.HOST + '/material/supplier/' + this.supplier.sp_id
       this.$http(materialUrl).then(res => {
         this.materialNameOptions = res.data
         console.log(this.materialNameOptions)
       })
+    },
+    deleteItem (index, row) {
+      this.materialformdataList.remove(index)
+      console.log(index, row, '删除')
     },
     getOrderList () {
       console.log('交易状态', this.chooseOrderItem)
@@ -394,7 +443,7 @@ export default {
     }
   },
   mounted () {
-    this.getMaterialList()
+    this.getSupplierList()
   }
 }
 </script>
