@@ -29,7 +29,7 @@
     <!-- 订单表格部分 -->
     <div class="ordedatabox">
       <el-table height='520'
-         :data="materialNameOptions"
+         :data="orderList"
          border
          style="width: 100%">
          <el-table-column
@@ -140,7 +140,7 @@ export default {
       curCount: 10,
       curPage: 1,
       // 表格数据
-      materialNameOptions: [{
+      orderList: [{
         number: 'GDa103219',
         time: '2014-12-08 16:07:06',
         ordergood: '共 3 款，12件',
@@ -183,7 +183,7 @@ export default {
     },
     getOrderList () {
       console.log('交易状态', this.chooseOrderItem)
-      var orderListUrl = this.HOST + '/trade/list'
+      var orderListUrl = this.HOST + '/order/list'
       this.$http.post(orderListUrl, qs.stringify({
         status: this.chooseOrderItem,
         tradeId: this.ordernum,
@@ -191,51 +191,6 @@ export default {
         page: this.curPage
       })).then(res => {
         console.log(res.data.list)
-        this.materialNameOptions = res.data.list
-        for (var i = 0; i < this.materialNameOptions.length; i++) {
-          if (this.materialNameOptions[i].status < 2) {
-            this.materialNameOptions[i].transport = '待发货'
-          } else if (this.materialNameOptions[i].status >= 2 && this.materialNameOptions[i].status < 5) {
-            this.materialNameOptions[i].transport = '已发货'
-          } else if (this.materialNameOptions[i].status === 5) {
-            this.materialNameOptions[i].transport = '交易关闭'
-          } else if (this.materialNameOptions[i].status === 6) {
-            this.materialNameOptions[i].transport = '退货中'
-          } else if (this.materialNameOptions[i].status === 7) {
-            this.materialNameOptions[i].transport = '退货中'
-          } else if (this.materialNameOptions[i].status === 8) {
-            this.materialNameOptions[i].transport = '退款成功'
-          }
-          switch (this.materialNameOptions[i].status) {
-            case 0:
-              this.materialNameOptions[i].status = '待付款'
-              break
-            case 1:
-              this.materialNameOptions[i].status = '待发货'
-              break
-            case 2:
-              this.materialNameOptions[i].status = '待收货'
-              break
-            case 3:
-              this.materialNameOptions[i].status = '待评价'
-              break
-            case 4:
-              this.materialNameOptions[i].status = '已完成'
-              break
-            case 5:
-              this.materialNameOptions[i].status = '交易关闭'
-              break
-            case 6:
-              this.materialNameOptions[i].status = '退货中'
-              break
-            case 7:
-              this.materialNameOptions[i].status = '退款中'
-              break
-            case 8:
-              this.materialNameOptions[i].status = '退款成功'
-              break
-          }
-        }
       })
     }
   },
