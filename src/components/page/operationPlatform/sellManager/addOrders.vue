@@ -9,7 +9,7 @@
 
       <div class="ordersearchbox">
           <el-button type="primary" icon="search" @click='addMaterial()'>添加原料</el-button>
-          <el-button type="primary" icon="search" @click='order()'>确认下单</el-button>
+          <el-button type="primary" icon="search" @click='allcConfirm()'>确认下单</el-button>
       </div>
         <div class="choosestatus">
           <!-- 订单状态选择框 -->
@@ -201,7 +201,7 @@
 </template>
 
 <script>
-// import qs from 'querystring'
+import qs from 'querystring'
 import AMap from 'AMap'
 export default {
   data () {
@@ -266,10 +266,6 @@ export default {
     }
   },
   methods: {
-    order () {
-      this.printDialogStatus = true
-      console.log('下单')
-    },
     getSupplierList () {
       var materialUrl = encodeURI(this.HOST + '/suppliers')
       this.$http(materialUrl).then(res => {
@@ -278,6 +274,14 @@ export default {
     },
     allcConfirm () {
       this.materialformdataList.push(this.materialformdata)
+      var materialUrl = encodeURI(this.HOST + '/order')
+      console.log('before post', this.materialformdataList)
+      this.$http.post(materialUrl, qs.stringify({
+        data: this.materialformdataList
+      })).then(res => {
+        var result = res.data
+        console.log('结果', result)
+      })
       this.materialDialogStatus = false
       this.materialformdata = { 'amount': 1 }
       console.log('try to add a material')

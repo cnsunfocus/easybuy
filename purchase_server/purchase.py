@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from flask import Flask
+from flask import Flask, request
 import MySQLdb
 import datetime
 import json
@@ -8,6 +8,7 @@ import json
 app = Flask(__name__)
 import config
 import sys
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -54,6 +55,7 @@ def get_standard_list(name, sp_id):
 
   return json.dumps(gb_data)
 
+
 @app.route('/api/suppliers')
 def get_suppliers():
   conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
@@ -75,7 +77,6 @@ def get_suppliers():
     gb_data.append(data)
 
   return json.dumps(gb_data)
-
 
 
 @app.route('/api/material/<string:name>/standard/<string:standard>/supplier/<string:sp_id>')
@@ -109,35 +110,55 @@ def get_units(name, standard, sp_id):
   return json.dumps(ret_data)
 
 
-@app.route('/api/purchase_order/list')
-def get_purchase_order():
+@app.route('/api/order', methods=['POST'])
+def add_order():
   conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
                          charset=config.db_charset)
+  req = request
   cur = conn.cursor()
-  cur.execute("select sp_name, code from t_supplier")
+  cur.execute(
+    "select o.id, o.order_id, o.supplier, o.sp_contact, o.sp_phone, o.status, d.name, sum(d.price * d.amount) as totalPrice "
+    "from t_order_list o, t_order_detail d "
+    "where o.order_id = d.order_id")
+
   results = cur.fetchall()
   ret_data = []
   for r in results:
     data = {}
-    data['sp_name'] = r[0]
-    data['sp_code'] = r[1]
+    data['id'] = r[0]
+    data['order_id'] = r[1]
+    data['supplier'] = r[2]
+    data['sp_contact'] = r[3]
+    data['sp_phone'] = r[4]
+    data['status'] = r[5]
+    data['name'] = r[6]
+    data['totalPrice'] = r[7]
     ret_data.append(data)
   return json.dumps(ret_data)
 
 
-@app.route('/api/trade/list')
-def get_trade_list():
+@app.route('/api/order/list')
+def get_order_list():
   conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
                          charset=config.db_charset)
   cur = conn.cursor()
-  cur.execute("select sp_name, code from t_supplier")
+  cur.execute(
+    "select o.id, o.order_id, o.supplier, o.sp_contact, o.sp_phone, o.status, d.name, sum(d.price * d.amount) as totalPrice "
+    "from t_order_list o, t_order_detail d "
+    "where o.order_id = d.order_id")
 
   results = cur.fetchall()
   ret_data = []
   for r in results:
     data = {}
-    data['sp_name'] = r[0]
-    data['sp_code'] = r[1]
+    data['id'] = r[0]
+    data['order_id'] = r[1]
+    data['supplier'] = r[2]
+    data['sp_contact'] = r[3]
+    data['sp_phone'] = r[4]
+    data['status'] = r[5]
+    data['name'] = r[6]
+    data['totalPrice'] = r[7]
     ret_data.append(data)
   return json.dumps(ret_data)
 

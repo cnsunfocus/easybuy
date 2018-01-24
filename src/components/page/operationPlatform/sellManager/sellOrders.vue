@@ -33,7 +33,7 @@
          border
          style="width: 100%">
          <el-table-column
-           prop="tradeId"
+           prop="orderId"
            label="订单号"
            width="180">
          </el-table-column>
@@ -42,12 +42,17 @@
            label="下单时间"
            width="180">
          </el-table-column>
+        <el-table-column
+           prop="supplier"
+           label="供货商">
+         </el-table-column>
          <el-table-column
-           prop="ordergood"
-           label="订单商品">
-           <template scope='scope'>
-             共{{scope.row.goodsCount}}类, {{scope.row.goodsTypeCount}}件
-           </template>
+           prop="sp_contact"
+           label="联系人">
+         </el-table-column>
+         <el-table-column
+           prop="sp_phone"
+           label="联系电话">
          </el-table-column>
          <el-table-column
            prop="userName"
@@ -140,15 +145,7 @@ export default {
       curCount: 10,
       curPage: 1,
       // 表格数据
-      orderList: [{
-        number: 'GDa103219',
-        time: '2014-12-08 16:07:06',
-        ordergood: '共 3 款，12件',
-        buyer: 'AKURA樱花',
-        tradestatus: '待付款',
-        goodinfo: '待发货',
-        actualmoney: '¥28.00（含快递 ¥8.00)'
-      }]
+      orderList: []
     }
   },
   methods: {
