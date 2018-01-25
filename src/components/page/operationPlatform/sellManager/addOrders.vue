@@ -9,7 +9,7 @@
 
       <div class="ordersearchbox">
           <el-button type="primary" icon="search" @click='addMaterial()'>添加原料</el-button>
-          <el-button type="primary" icon="search" @click='allcConfirm()'>确认下单</el-button>
+          <el-button type="primary" icon="search" @click='addOrder()'>确认下单</el-button>
       </div>
         <div class="choosestatus">
           <!-- 订单状态选择框 -->
@@ -113,9 +113,9 @@
                     <label>供应商(签章):</label>
                   </div>
                 </div>
-                
+
               </div>
-   
+
     </div>
 
             <!-- 添加规格组弹框 -->
@@ -175,7 +175,8 @@
                     v-model="materialformdata.date"
                     type="date"
                     format="yyyy-MM-dd"
-                    placeholder="请选择交货日期">
+                    placeholder="请选择交货日期"
+                    @change="formatDate">
                   </el-date-picker>
                 </el-form-item>
                 <el-form-item label="备注">
@@ -183,7 +184,7 @@
                 </el-form-item>
               </el-form>
               <span slot="footer" class="dialog-footer">
-                      <el-button type="primary" @click="allcConfirm">确 定</el-button>
+                      <el-button type="primary" @click="addMaterialConfirm">确 定</el-button>
                       <el-button @click="materialDialogStatus = false">取 消</el-button>
               </span>
             </el-dialog>
@@ -192,7 +193,7 @@
               :title="printDialogTitle"
               :visible.sync="printDialogStatus"
               size="tiny">
-              
+
               <el-form ref="standardform" :model="materialformdata" label-width="100px">
                 <el-form-item></el-form-item>
               </el-form>
@@ -201,7 +202,7 @@
 </template>
 
 <script>
-import qs from 'querystring'
+// import qs from 'querystring'
 import AMap from 'AMap'
 export default {
   data () {
@@ -272,16 +273,22 @@ export default {
         this.supplierOptions = res.data
       })
     },
-    allcConfirm () {
-      this.materialformdataList.push(this.materialformdata)
+    addOrder () {
       var materialUrl = encodeURI(this.HOST + '/order')
       console.log('before post', this.materialformdataList)
-      this.$http.post(materialUrl, qs.stringify({
+      this.$http.post(materialUrl, {
         data: this.materialformdataList
-      })).then(res => {
+      }).then(res => {
         var result = res.data
         console.log('结果', result)
       })
+      console.log('try to add a order')
+    },
+    addMaterialConfirm () {
+      const format = require('date-fns/format')
+      var dt = this.materialformdata.date
+      this.materialformdata.date = format(dt, 'YYYY-MM-DD')
+      this.materialformdataList.push(this.materialformdata)
       this.materialDialogStatus = false
       this.materialformdata = { 'amount': 1 }
       console.log('try to add a material')
@@ -312,6 +319,10 @@ export default {
         this.materialUnitOptions = res.data['unit']
         console.log(this.materialNameOptions)
       })
+    },
+    formatDate (value) {
+      const format = require('date-fns/format')
+      console.log(format(value, 'YYYY-MM-DD'))
     },
     checkNo (value) {
       console.log('校验')
