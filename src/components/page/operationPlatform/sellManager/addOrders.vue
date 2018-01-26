@@ -13,7 +13,7 @@
       </div>
         <div class="choosestatus">
           <!-- 订单状态选择框 -->
-          <el-select v-model="supplier"  placeholder="供应商列表">
+          <el-select v-model="supplier" value-key="sp_id" placeholder="供应商列表">
             <el-option
             @click.native="clearOrder(item)"
             v-for="item in supplierOptions"
@@ -36,7 +36,7 @@
                        <td>订单号:</td>
                        <td>{{printDialogTitle}}</td>
                        <td>订单日期:</td>
-                       <td>{{printDialogTitle}}</td>
+                       <td>{{materialformdata.order_date}}</td>
                      </tr>
                     <tr style = "boder:1px">
                       <td>计划单:</td>
@@ -204,6 +204,7 @@
 <script>
 // import qs from 'querystring'
 import AMap from 'AMap'
+import format from 'date-fns'
 export default {
   data () {
     return {
@@ -222,7 +223,8 @@ export default {
         amount: 1,
         price: '',
         date: '',
-        note: ''
+        note: '',
+        order_date: ''
       },
       orderOptions: [{
         name: '待付款',
@@ -285,7 +287,6 @@ export default {
       console.log('try to add a order')
     },
     addMaterialConfirm () {
-      const format = require('date-fns/format')
       var dt = this.materialformdata.date
       this.materialformdata.date = format(dt, 'YYYY-MM-DD')
       this.materialformdataList.push(this.materialformdata)
@@ -458,6 +459,8 @@ export default {
     }
   },
   mounted () {
+    const
+    this.materialformdata.order_date = format(new Date(), 'YYYY-MM-DD')
     this.getSupplierList()
   }
 }

@@ -114,12 +114,15 @@ def get_units(name, standard, sp_id):
 def add_order():
   conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
                          charset=config.db_charset)
-  req = request
+  data = json.loads(request.data)
   cur = conn.cursor()
   cur.execute(
-    "select o.id, o.order_id, o.supplier, o.sp_contact, o.sp_phone, o.status, d.name, sum(d.price * d.amount) as totalPrice "
-    "from t_order_list o, t_order_detail d "
-    "where o.order_id = d.order_id")
+    "insert into t_order_list (order_id, order_date, supplier, sp_addr, sp_contact, sp_phone, sp_fax, "
+    "sp_email, contact, addr, phone, fax, email values "
+    "('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (
+      data['order_id'], data['order_data'], data['supplier'], data['sp_addr'], data['sp_contact'],
+      data['sp_phone'], data['sp_fax'], data['sp_email'], data['contact'], data['addr'], data['phone'],
+      data['fax'], data['email']))
 
   results = cur.fetchall()
   ret_data = []
