@@ -34,13 +34,13 @@
                   <table width="100%" border="1" cellpadding="0" cellspacing="0" style= "border:1px solid #000000;border-right-color:#FF0000;">
                      <tr style = "boder:1px">
                        <td>订单号:</td>
-                       <td>{{printDialogTitle}}</td>
+                       <td>{{order_id}}</td>
                        <td>订单日期:</td>
-                       <td>{{materialformdata.order_date}}</td>
+                       <td>{{order_date}}</td>
                      </tr>
                     <tr style = "boder:1px">
                       <td>计划单:</td>
-                      <td>{{printDialogTitle}}</td>
+                      <td>{{}}</td>
                       <td>订购方:</td>
                       <td>南京柔科</td>
                     </tr>
@@ -48,7 +48,7 @@
                       <td>供应商:</td>
                       <td>{{supplier.sp_name}}</td>
                       <td>地址:</td>
-                      <td>南京柔科</td>
+                      <td>{{addr}}</td>
                     </tr>
                     <tr style = "boder:1px">
                       <td>联系人:</td>
@@ -60,13 +60,13 @@
                       <td>电话:</td>
                       <td>{{supplier.sp_phone}}</td>
                       <td>电话:</td>
-                      <td>南京柔科</td>
+                      <td>{{phone}}</td>
                     </tr>
                     <tr style = "boder:1px">
                       <td>传真:</td>
-                      <td>{{printDialogTitle}}</td>
+                      <td>{{supplier.fax}}</td>
                       <td>传真:</td>
-                      <td>南京柔科</td>
+                      <td>{{fax}}</td>
                     </tr>
                     <tr style = "boder:1px">
                       <td  colspan="4">订购内容:</td>
@@ -204,11 +204,13 @@
 <script>
 // import qs from 'querystring'
 import AMap from 'AMap'
-import format from 'date-fns'
+
 export default {
   data () {
     return {
       dialogTitle: '',
+      order_id: '',
+      order_date: '',
       materialDialogStatus: false,
       printDialogTitle: '确认采购订单',
       printDialogStatus: false,
@@ -223,37 +225,8 @@ export default {
         amount: 1,
         price: '',
         date: '',
-        note: '',
-        order_date: ''
+        note: ''
       },
-      orderOptions: [{
-        name: '待付款',
-        value: 0
-      }, {
-        name: '待发货',
-        value: 1
-      }, {
-        name: '待收货',
-        value: 2
-      }, {
-        name: '待评价',
-        value: 3
-      }, {
-        name: '已完成',
-        value: 4
-      }, {
-        name: '交易关闭',
-        value: 5
-      }, {
-        name: '退货中',
-        value: 6
-      }, {
-        name: '退款中',
-        value: 7
-      }, {
-        name: '退款成功',
-        value: 8
-      }],
       chooseOrderItem: '',
       chooseGoodItem: '',
       // 搜订单编号
@@ -279,15 +252,29 @@ export default {
       var materialUrl = encodeURI(this.HOST + '/order')
       console.log('before post', this.materialformdataList)
       this.$http.post(materialUrl, {
-        data: this.materialformdataList
+        data: this.materialformdataList,
+        'supplier': this.supplier,
+        'order_id': this.order_id,
+        'order_date': this.order_date,
+        'addr': '',
+        'contact': '',
+        'phone': '',
+        'fax': '',
+        'email': ''
       }).then(res => {
         var result = res.data
-        console.log('结果', result)
+        console.log('try to add a order', res.data)
+        if (result === 0) {
+          console.log('创建订单成功')
+          this.$router.push({
+            path: './sellorder'
+          })
+        }
       })
-      console.log('try to add a order')
     },
     addMaterialConfirm () {
       var dt = this.materialformdata.date
+      const format = require('date-fns/format')
       this.materialformdata.date = format(dt, 'YYYY-MM-DD')
       this.materialformdataList.push(this.materialformdata)
       this.materialDialogStatus = false
@@ -402,7 +389,7 @@ export default {
     },
     getOrderList () {
       console.log('交易状态', this.chooseOrderItem)
-//      var orderListUrl = this.HOST + '/purchase_order/list'
+//      var orderListUrl = this.HOST + '/order/list'
 //      this.$http(orderListUrl, qs.stringify({
 //        status: this.chooseOrderItem,
 //        tradeId: this.ordernum,
@@ -459,8 +446,9 @@ export default {
     }
   },
   mounted () {
-    const
-    this.materialformdata.order_date = format(new Date(), 'YYYY-MM-DD')
+    const form = require('date-fns/format')
+    this.order_date = form(new Date(), 'YYYY-MM-DD')
+    this.order_id = form(new Date(), 'YYYYMMDDHHmmss')
     this.getSupplierList()
   }
 }

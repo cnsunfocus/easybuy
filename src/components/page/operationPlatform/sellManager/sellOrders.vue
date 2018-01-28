@@ -111,16 +111,16 @@ export default {
     return {
       purchaseOrderDialog: false,
       orderOptions: [{
-        name: '待付款',
+        name: '待审核',
         value: 0
       }, {
-        name: '待发货',
+        name: '待付款',
         value: 1
       }, {
-        name: '待收货',
+        name: '待发货',
         value: 2
       }, {
-        name: '待评价',
+        name: '已发货',
         value: 3
       }, {
         name: '已完成',
@@ -183,11 +183,32 @@ export default {
       var orderListUrl = this.HOST + '/order/list'
       this.$http.post(orderListUrl, qs.stringify({
         status: this.chooseOrderItem,
-        tradeId: this.ordernum,
         count: this.curCount,
         page: this.curPage
       })).then(res => {
-        console.log(res.data.list)
+        console.log('获取订单列表', res.data)
+        this.orderList = res.data
+        for (var i = 0; i < this.materialNameOptions.length; i++) {
+          if (this.materialNameOptions[i].status === 0) {
+            this.materialNameOptions[i].transport = '待审核'
+          } else if (this.materialNameOptions[i].status === 1) {
+            this.materialNameOptions[i].transport = '待付款'
+          } else if (this.materialNameOptions[i].status === 2) {
+            this.materialNameOptions[i].transport = '待发货'
+          } else if (this.materialNameOptions[i].status === 3) {
+            this.materialNameOptions[i].transport = '已发货'
+          } else if (this.materialNameOptions[i].status === 4) {
+            this.materialNameOptions[i].transport = '已完成'
+          } else if (this.materialNameOptions[i].status === 5) {
+            this.materialNameOptions[i].transport = '交易关闭'
+          } else if (this.materialNameOptions[i].status === 6) {
+            this.materialNameOptions[i].transport = '退货中'
+          } else if (this.materialNameOptions[i].status === 7) {
+            this.materialNameOptions[i].transport = '退货中'
+          } else if (this.materialNameOptions[i].status === 8) {
+            this.materialNameOptions[i].transport = '退款成功'
+          }
+        }
       })
     }
   },

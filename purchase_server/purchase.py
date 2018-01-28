@@ -115,38 +115,33 @@ def add_order():
   conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
                          charset=config.db_charset)
   data = json.loads(request.data)
+  supplier = data['supplier']
+  material_list = data['data']
+
   cur = conn.cursor()
   cur.execute(
-    "insert into t_order_list (order_id, order_date, supplier, sp_addr, sp_contact, sp_phone, sp_fax, "
-    "sp_email, contact, addr, phone, fax, email values "
+    "insert into t_order_list (order_id, order_date, supplier, sp_addr, sp_contact, sp_phone, sp_fax, sp_email, contact, addr, phone, fax, email) values "
     "('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (
-      data['order_id'], data['order_data'], data['supplier'], data['sp_addr'], data['sp_contact'],
-      data['sp_phone'], data['sp_fax'], data['sp_email'], data['contact'], data['addr'], data['phone'],
+      data['order_id'], data['order_date'], supplier['sp_name'], supplier['sp_addr'], supplier['sp_contact'],
+      supplier['sp_phone'], supplier['sp_phone'], supplier['sp_phone'], data['contact'], data['addr'], data['phone'],
       data['fax'], data['email']))
 
-  results = cur.fetchall()
-  ret_data = []
-  for r in results:
-    data = {}
-    data['id'] = r[0]
-    data['order_id'] = r[1]
-    data['supplier'] = r[2]
-    data['sp_contact'] = r[3]
-    data['sp_phone'] = r[4]
-    data['status'] = r[5]
-    data['name'] = r[6]
-    data['totalPrice'] = r[7]
-    ret_data.append(data)
-  return json.dumps(ret_data)
+  for m in material_list:
+    cur.execute("insert into t_order_detail (order_id, material, price, amount, standard, note) VALUES "
+                "('%s', '%s', %s, %s, '%s', '%s')" % (
+                  data['order_id'], m['name'], m['price'], m['amount'], m['type'], m['note']))
+
+  conn.commit()
+  return "0"
 
 
-@app.route('/api/order/list')
+@app.route('/api/order/list', methods=['POST'])
 def get_order_list():
   conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
                          charset=config.db_charset)
   cur = conn.cursor()
   cur.execute(
-    "select o.id, o.order_id, o.supplier, o.sp_contact, o.sp_phone, o.status, d.name, sum(d.price * d.amount) as totalPrice "
+    "select o.id, o.order_id, o.supplier, o.sp_contact, o.sp_phone, o.status, d.material as name, sum(d.price * d.amount)  as totalPrice "
     "from t_order_list o, t_order_detail d "
     "where o.order_id = d.order_id")
 
@@ -161,7 +156,7 @@ def get_order_list():
     data['sp_phone'] = r[4]
     data['status'] = r[5]
     data['name'] = r[6]
-    data['totalPrice'] = r[7]
+    data['totalPrice'] = float(r[7])
     ret_data.append(data)
   return json.dumps(ret_data)
 
