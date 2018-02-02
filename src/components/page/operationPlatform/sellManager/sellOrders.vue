@@ -33,12 +33,12 @@
          border
          style="width: 100%">
          <el-table-column
-           prop="orderId"
+           prop="order_id"
            label="订单号"
            width="180">
          </el-table-column>
          <el-table-column
-           prop="createdtime"
+           prop="order_date"
            label="下单时间"
            width="180">
          </el-table-column>
@@ -55,7 +55,7 @@
            label="联系电话">
          </el-table-column>
          <el-table-column
-           prop="userName"
+           prop="contact"
            label="下单员">
          </el-table-column>
          <el-table-column
@@ -67,21 +67,22 @@
            label="物流信息">
          </el-table-column>
           <el-table-column
-            prop="actualPrice"
-            label="已付款">
+            prop="totalPrice"
+            label="总金额">
           </el-table-column>
+          <!--
          <el-table-column
            prop="actualPrice"
            label="应付款">
          </el-table-column>
+         -->
          <el-table-column
            prop="operation"
            label="操作">
-           <template scope="scope">
-             <span class="bluebtn">催货</span>
-             <span class="bluebtn">退货</span>
-             <span class="bluebtn">确认收货</span>
-             <span class="bluebtn">详情</span>
+           <template slot-scope="scope">
+             <span class="bluebtn"  @click="addOrder()">修改</span>
+             <span class="bluebtn">进度</span>
+             <span class="bluebtn" @click="showDetail(scope.row)">详情</span>
            </template>
          </el-table-column>
        </el-table>
@@ -99,17 +100,145 @@
         </el-pagination>
       </div>
     </div>
+  <el-dialog
+    :title="采购明细"
+    :visible.sync="confirmDlg"
+    size="tiny">
+    <div id="confirmOrder">
+      <h1 align = "center">采购单</h1>
+      <br></br>
+      <div>
+        <table width="100%" border="1" cellpadding="0" cellspacing="0" style= "border:1px solid #000000;border-right-color:#FF0000;">
+          <tr style = "boder:1px">
+            <td>订单号:</td>
+            <td>{{confirmInfo.order_id}}</td>
+            <td>订单日期:</td>
+            <td>{{confirmInfo.order_date}}</td>
+          </tr>
+          <tr style = "boder:1px">
+            <td>计划单:</td>
+            <td>{{}}</td>
+            <td>订购方:</td>
+            <td>南京柔科</td>
+          </tr>
+          <tr style = "boder:1px">
+            <td>供应商:</td>
+            <td>{{confirmInfo.supplier.name}}</td>
+            <td>地址:</td>
+            <td>{{confirmInfo.buyer.addr}}</td>
+          </tr>
+          <tr style = "boder:1px">
+            <td>联系人:</td>
+            <td>{{confirmInfo.supplier.contact}}</td>
+            <td>联系人:</td>
+            <td>史辉</td>
+          </tr>
+          <tr style = "boder:1px">
+            <td>电话:</td>
+            <td>{{confirmInfo.supplier.phone}}</td>
+            <td>电话:</td>
+            <td>{{confirmInfo.buyer.phone}}</td>
+          </tr>
+          <tr style = "boder:1px">
+            <td>传真:</td>
+            <td>{{confirmInfo.supplier.fax}}</td>
+            <td>传真:</td>
+            <td>{{confirmInfo.buyer.fax}}</td>
+          </tr>
+          <tr style = "boder:1px">
+            <td  colspan="4">订购内容:</td>
+          </tr>
+          <tr style = "boder:1px">
+            <td colspan="4">
+              <table id="confirmDetail" width="100%" border="1" cellpadding="0" cellspacing="0"
+                     style= "border:1px solid #000000;border-right-color:#FF0000;">
+                <tr>
+                  <th>序号</th>
+                  <th>物料名称</th>
+                  <th>型号</th>
+                  <th>单位</th>
+                  <th>数量</th>
+                  <th>单价</th>
+                  <th>交货期</th>
+                  <th>备注</th>
+                </tr>
+                <tr v-for="(item, index) in orderDetail">
+                  <td>{{index + 1}}</td>
+                  <td>{{item.name}}</td>
+                  <td>{{item.standard}}</td>
+                  <td>{{item.unit}}</td>
+                  <td>{{item.amount}}</td>
+                  <td>{{item.price}}</td>
+                  <td>{{item.date}}</td>
+                  <td>{{item.note}}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr style = "boder:1px">
+            <td align="left" colspan="4">
+              <p>交易条款:</p>
+              <p>一. 交期</p>
+              <p>二. 品质</p>
+              <p>三. 不良处理</p>
+            </td>
+          </tr>
+        </table>
+        <div id="orderFooter">
+          <input type="text">采购: </input>
+          <input type="text">审核: </input>
+          <label>供应商(签章):</label>
+        </div>
+      </div>
+  
+    </div>
+    
+  </el-dialog>
+
+<!--
+    <el-dialog
+      :title="采购明细"
+      :visible.sync="orderDetailDlg"
+      size="tiny">
+      <table id="orderDetail" width="100%" border="1" cellpadding="0" cellspacing="0"
+             style= "border:1px solid #000000;border-right-color:#FF0000;">
+        <tr>
+          <th>序号</th>
+          <th>物料名称</th>
+          <th>型号</th>
+          <th>单位</th>
+          <th>数量</th>
+          <th>单价</th>
+          <th>交货期</th>
+          <th>备注</th>
+        </tr>
+        <tr v-for="(item, index) in orderDetail">
+          <td>{{index + 1}}</td>
+          <td>{{item.name}}</td>
+          <td>{{item.standard}}</td>
+          <td>{{item.unit}}</td>
+          <td>{{item.amount}}</td>
+          <td>{{item.price}}</td>
+          <td>{{item.date}}</td>
+          <td>{{item.note}}</td>
+        </tr>
+      </table></el-dialog>
+      -->
 
   </div>
+
 </template>
 
 <script>
 import qs from 'querystring'
 import AMap from 'AMap'
+import ElDialog from '../../../../../node_modules/element-ui/packages/dialog/src/component'
 export default {
+  components: {ElDialog},
   data () {
     return {
       purchaseOrderDialog: false,
+      confirmDlg: false,
       orderOptions: [{
         name: '待审核',
         value: 0
@@ -145,13 +274,32 @@ export default {
       curCount: 10,
       curPage: 1,
       // 表格数据
-      orderList: []
+      orderList: [],
+      orderDetail: [],
+      confirmInfo: {
+        order_id: '',
+        order_date: '',
+        supplier: {},
+        buyer: {}
+      }
     }
   },
   methods: {
     addOrder () {
       this.$router.push({
         path: '/addOrder'
+      })
+    },
+    showDetail (order) {
+      var orderDetailUrl = this.HOST + '/order/detail/' + order.order_id
+      this.$http(orderDetailUrl).then(res => {
+        this.orderDetail = res.data['order_detail']
+        this.confirmInfo.order_id = res.data['order_id']
+        this.confirmInfo.order_date = res.data['order_date']
+        this.confirmInfo.supplier = res.data['supplier']
+        this.confirmInfo.buyer = res.data['buyer']
+        this.confirmDlg = true
+        console.log('采购明细', res.data)
       })
     },
     handleSizeChange (val) {

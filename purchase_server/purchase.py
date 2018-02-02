@@ -127,9 +127,9 @@ def add_order():
       data['fax'], data['email']))
 
   for m in material_list:
-    cur.execute("insert into t_order_detail (order_id, material, price, amount, standard, note) VALUES "
+    cur.execute("insert into t_order_detail (order_id, material, price, amount, standard, note, recv_date, unit) VALUES "
                 "('%s', '%s', %s, %s, '%s', '%s')" % (
-                  data['order_id'], m['name'], m['price'], m['amount'], m['type'], m['note']))
+                  data['order_id'], m['name'], m['price'], m['amount'], m['type'], m['note'], m['date'], m['unit']['desc']))
 
   conn.commit()
   return "0"
@@ -141,7 +141,8 @@ def get_order_list():
                          charset=config.db_charset)
   cur = conn.cursor()
   cur.execute(
-    "select o.id, o.order_id, o.supplier, o.sp_contact, o.sp_phone, o.status, d.material as name, sum(d.price * d.amount)  as totalPrice "
+    "select o.id, o.order_id, o.supplier, o.sp_contact, o.sp_phone, o.status, d.material as name, sum(d.price * d.amount)  as totalPrice, "
+    "o.order_date "
     "from t_order_list o, t_order_detail d "
     "where o.order_id = d.order_id")
 
@@ -157,9 +158,58 @@ def get_order_list():
     data['status'] = r[5]
     data['name'] = r[6]
     data['totalPrice'] = float(r[7])
+    data['order_date'] = r[8].strftime('%Y-%m-%d')
     ret_data.append(data)
   return json.dumps(ret_data)
 
+
+@app.route('/api/order/detail/<string:order_id>')
+def get_order_detail(order_id):
+  conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
+                         charset=config.db_charset)
+  cur = conn.cursor()
+  cur.execute("select id, order_id, order_date, status, supplier, sp_addr, sp_contact, sp_phone, sp_fax, sp_email, "
+              " contact, addr, phone, fax, email from t_order_list where order_id = '%s'" % order_id)
+  results = cur.fetchall()
+  ret = {}
+  ret['order_id'] = results[0][1]
+  ret['order_date'] = results[0][2].strftime('%Y-%m-%d')
+  ret['status'] = results[0][3]
+  ret['supplier'] = {}
+  ret['supplier']['name'] = results[0][4]
+  ret['supplier']['addr'] = results[0][5]
+  ret['supplier']['contact'] = results[0][6]
+  ret['supplier']['phone'] = results[0][7]
+  ret['supplier']['fax'] = results[0][8]
+  ret['supplier']['mail'] = results[0][9]
+
+  ret['buyer'] = {}
+  ret['buyer']['contact'] = results[0][10]
+  ret['buyer']['addr'] = results[0][11]
+  ret['buyer']['phone'] = results[0][12]
+  ret['buyer']['fax'] = results[0][13]
+  ret['buyer']['mail'] = results[0][14]
+
+  cur.execute(
+    "select  d.id, d.order_id,  d.material, d.amount, d.price, d.standard, d.note, d.recv_date, d.unit "
+    "from  t_order_detail d  where d.order_id = '%s'" % order_id)
+
+  results = cur.fetchall()
+  ret_data = []
+  for r in results:
+    data = {}
+    data['id'] = r[0]
+    data['order_id'] = r[1]
+    data['name'] = r[2]
+    data['amount'] = r[3]
+    data['price'] = float(r[4])
+    data['standard'] = r[5]
+    data['note'] = r[6]
+    data['date'] = r[7].strftime('%Y-%m-%d')
+    data['unit'] = r[8]
+    ret_data.append(data)
+  ret['order_detail'] = ret_data
+  return json.dumps(ret)
 
 if __name__ == '__main__':
   app.run(port=8089)
