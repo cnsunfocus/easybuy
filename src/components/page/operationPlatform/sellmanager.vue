@@ -1,6 +1,6 @@
 <template>
 <div class="sellmanager">
-  <v-subsidebar :sidebardata='sidebardatas' :maintitle='maintitle' defaultLightHeight='sellsetting'></v-subsidebar>
+  <!--<v-subsidebar :sidebardata='sidebardatas' :maintitle='maintitle' defaultLightHeight='sellsetting'></v-subsidebar>-->
   <div class="innercontent">
     <transition name="move" mode="out-in">
       <router-view></router-view>

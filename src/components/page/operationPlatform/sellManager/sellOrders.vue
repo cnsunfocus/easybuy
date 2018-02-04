@@ -80,9 +80,8 @@
            prop="operation"
            label="操作">
            <template slot-scope="scope">
-             <span class="bluebtn"  @click="addOrder()">修改</span>
-             <span class="bluebtn">进度</span>
-             <span class="bluebtn" @click="showDetail(scope.row)">详情</span>
+             <span class="bluebtn"  @click="addProgress()">进度</span>
+             <span class="bluebtn" @click="showDetail(scope.row)">审核</span>
            </template>
          </el-table-column>
        </el-table>
@@ -166,9 +165,10 @@
                   <td>{{index + 1}}</td>
                   <td>{{item.name}}</td>
                   <td>{{item.standard}}</td>
-                  <td>{{item.unit}}</td>
+                  <td >{{item.unit}}</td>
                   <td>{{item.amount}}</td>
-                  <td>{{item.price}}</td>
+                  <td v-if="!editFlag">{{item.price}}</td>
+                  <td v-if="editFlag"><input :value="item.price"></input></td>
                   <td>{{item.date}}</td>
                   <td>{{item.note}}</td>
                 </tr>
@@ -190,9 +190,9 @@
           <label>供应商(签章):</label>
         </div>
       </div>
-  
+
     </div>
-    
+
   </el-dialog>
 
 <!--
@@ -224,7 +224,6 @@
         </tr>
       </table></el-dialog>
       -->
-
   </div>
 
 </template>
@@ -237,6 +236,7 @@ export default {
   components: {ElDialog},
   data () {
     return {
+      editFlag: true,
       purchaseOrderDialog: false,
       confirmDlg: false,
       orderOptions: [{
@@ -252,7 +252,7 @@ export default {
         name: '已发货',
         value: 3
       }, {
-        name: '已完成',
+        name: '已入库',
         value: 4
       }, {
         name: '交易关闭',
@@ -266,6 +266,12 @@ export default {
       }, {
         name: '退款成功',
         value: 8
+      }, {
+        name: '部分入库',
+        value: 9
+      }, {
+        name: '作废',
+        value: -1
       }],
       chooseOrderItem: '',
       chooseGoodItem: '',
@@ -336,27 +342,6 @@ export default {
       })).then(res => {
         console.log('获取订单列表', res.data)
         this.orderList = res.data
-        for (var i = 0; i < this.materialNameOptions.length; i++) {
-          if (this.materialNameOptions[i].status === 0) {
-            this.materialNameOptions[i].transport = '待审核'
-          } else if (this.materialNameOptions[i].status === 1) {
-            this.materialNameOptions[i].transport = '待付款'
-          } else if (this.materialNameOptions[i].status === 2) {
-            this.materialNameOptions[i].transport = '待发货'
-          } else if (this.materialNameOptions[i].status === 3) {
-            this.materialNameOptions[i].transport = '已发货'
-          } else if (this.materialNameOptions[i].status === 4) {
-            this.materialNameOptions[i].transport = '已完成'
-          } else if (this.materialNameOptions[i].status === 5) {
-            this.materialNameOptions[i].transport = '交易关闭'
-          } else if (this.materialNameOptions[i].status === 6) {
-            this.materialNameOptions[i].transport = '退货中'
-          } else if (this.materialNameOptions[i].status === 7) {
-            this.materialNameOptions[i].transport = '退货中'
-          } else if (this.materialNameOptions[i].status === 8) {
-            this.materialNameOptions[i].transport = '退款成功'
-          }
-        }
       })
     }
   },

@@ -1,8 +1,12 @@
 <template>
 <div class="wrapper">
+  <!--
   <v-sidebar></v-sidebar>
+  -->
   <div class="mainpage">
+    <!--
     <v-header></v-header>
+    -->
     <div class="content">
       <transition name="move" mode="out-in">
         <router-view></router-view>
