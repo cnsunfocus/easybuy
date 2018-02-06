@@ -80,7 +80,7 @@
            prop="operation"
            label="操作">
            <template slot-scope="scope">
-             <span class="bluebtn"  @click="addProgress()">进度</span>
+             <span class="bluebtn"  @click="addProgress(scope.row.order_id)">进度</span>
              <span class="bluebtn" @click="showDetail(scope.row)">审核</span>
            </template>
          </el-table-column>
@@ -294,6 +294,11 @@ export default {
     addOrder () {
       this.$router.push({
         path: '/addOrder'
+      })
+    },
+    addProgress (orderId) {
+      this.$router.push({
+        path: '/progress/' + orderId
       })
     },
     showDetail (order) {

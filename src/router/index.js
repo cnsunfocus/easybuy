@@ -102,6 +102,9 @@ export default new Router({
       }, {
         path: '/addOrder',
         component: resolve => require(['../components/page/operationPlatform/sellmanager/addOrders.vue'], resolve)
+      }, {
+        path: '/progress/:id',
+        component: resolve => require(['../components/page/operationPlatform/sellmanager/orderProgress.vue'], resolve)
       }
       ]
     }, {
