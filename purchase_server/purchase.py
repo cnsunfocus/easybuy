@@ -127,9 +127,10 @@ def add_order():
       data['fax'], data['email']))
 
   for m in material_list:
-    cur.execute("insert into t_order_detail (order_id, material, price, amount, standard, note, recv_date, unit) VALUES "
-                "('%s', '%s', %s, %s, '%s', '%s')" % (
-                  data['order_id'], m['name'], m['price'], m['amount'], m['type'], m['note'], m['date'], m['unit']['desc']))
+    cur.execute(
+      "insert into t_order_detail (order_id, material, price, amount, standard, note, recv_date, unit) VALUES "
+      "('%s', '%s', %s, %s, '%s', '%s', '%s', '%s')" % (
+        data['order_id'], m['name'], m['price'], m['amount'], m['type'], m['note'], m['date'], m['unit']['desc']))
 
   conn.commit()
   return "0"
@@ -141,10 +142,9 @@ def get_order_list():
                          charset=config.db_charset)
   cur = conn.cursor()
   cur.execute(
-    "select o.id, o.order_id, o.supplier, o.sp_contact, o.sp_phone, o.status, d.material as name, sum(d.price * d.amount)  as totalPrice, "
-    "o.order_date "
-    "from t_order_list o, t_order_detail d "
-    "where o.order_id = d.order_id")
+    "select o.id, o.order_id, o.supplier, o.sp_contact, o.sp_phone, o.status, d.material as name, "
+    "sum(d.price * d.amount)  as totalPrice, o.order_date "
+    "from t_order_list o, t_order_detail d where o.order_id = d.order_id group by d.order_id")
 
   results = cur.fetchall()
   ret_data = []
@@ -210,6 +210,60 @@ def get_order_detail(order_id):
     ret_data.append(data)
   ret['order_detail'] = ret_data
   return json.dumps(ret)
+
+
+@app.route('/api/order/<string:order_id>/progress/list', methods=['GET'])
+def get_order_progress_list(order_id):
+  conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
+                         charset=config.db_charset)
+  cur = conn.cursor()
+  cur.execute(
+    "select o.id, o.order_id, o.op_date, o.operator, o.note, o.new_status, o.status "
+    "from t_order_progress o "
+    "where o.order_id = '%s' order by o.op_date desc " % order_id)
+
+  results = cur.fetchall()
+  ret_data = []
+  for r in results:
+    data = {}
+    data['id'] = r[0]
+    data['order_id'] = r[1]
+    data['op_date'] = r[2]
+    data['operator'] = r[3]
+    data['note'] = r[4]
+    data['new_status'] = r[5]
+    data['status'] = r[6]
+    ret_data.append(data)
+
+
+  cur.execute("select status from t_order_list where order_id = '%s'" % order_id)
+  ret = cur.fetchone()
+  result = {}
+  result['progress'] = ret_data
+  result['status'] = ret[0]
+  result['order_id'] = order_id
+
+  return json.dumps(result)
+
+
+@app.route('/api/order/progress', methods=['POST'])
+def add_progress():
+  conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
+                         charset=config.db_charset)
+  data = json.loads(request.data)
+  order_id = data['order_id']
+  op_date = data['op_date']
+  operator = data['operator']
+  note = data['note']
+  new_status = data['new_status']
+  status = data['status']
+  cur = conn.cursor()
+  cur.execute(
+    "insert into t_order_progress (order_id, op_date, operator, note, new_status, status) "
+    "values ('%s','%s','%s','%s',%s, %s) " % (order_id, op_date, operator, note, new_status, status))
+
+  return "0"
+
 
 if __name__ == '__main__':
   app.run(port=8089)

@@ -8,16 +8,16 @@
       <div class="settingtop clrfix">
 
       <div class="orderProgress">
-        <el-select v-model="orderStatus" value-key="value" placeholder="订单进度状态" @click.native="typeChange(item)">
+        <el-select v-model="new_status" value-key="value" placeholder="订单进度状态" @click.native="nameChange(item)">
           <el-option
-            v-for="item in orderOptions"
+            v-for="item in orderStatus"
             :key="item.value"
             :label="item.name"
             :value="item">
           </el-option>
         </el-select>
-        <el-input v-model="orderNote" placeholder="备注信息" style="width: 20%"></el-input>
-          <el-button type="primary" icon="search" @click='addProgress()'>更新进度</el-button>
+        <el-input v-model="op_note" placeholder="备注信息" style="width: 20%"></el-input>
+        <el-button type="primary" icon="search" @click='addProgress()'>更新进度</el-button>
         <el-button type="primary" class="addsort" icon="search" @click='back()'>返回</el-button>
       </div>
 
@@ -29,7 +29,7 @@
                 border
                 style="width: 100%">
         <el-table-column
-          prop="oper_date"
+          prop="op_date"
           label="操作时间"
           width="180">
         </el-table-column>
@@ -39,15 +39,15 @@
           width="180">
         </el-table-column>
         <el-table-column
-          prop="before_status"
+          prop="status"
           label="变更前状态">
         </el-table-column>
         <el-table-column
-          prop="after_status"
+          prop="new_status"
           label="变更后状态">
         </el-table-column>
         <el-table-column
-          prop="reason"
+          prop="note"
           label="变更原因">
         </el-table-column>
       </el-table>
@@ -59,11 +59,21 @@
 <script>
 // import qs from 'querystring'
 export default {
+  watch: {
+    $route (to, from) {
+      console.log('路由变化', to, from)
+    }
+  },
+  beforeRouteUpdate (to, from, next) {
+    console.log('路由变化', to)
+    console.log('路由变化', from)
+    next()
+  },
   data () {
     return {
       curCount: 10,
       curPage: 1,
-      orderOptions: [{
+      orderStatus: [{
         name: '待审核',
         value: 0
       }, {
@@ -97,9 +107,9 @@ export default {
         name: '作废',
         value: -1
       }],
-      oper_note: '',
+      op_note: '',
       orderId: '',
-      oper_date: '',
+      op_date: '',
       operator: '',
       new_status: '',
       status: '',
@@ -108,23 +118,17 @@ export default {
     }
   },
   methods: {
-    getSupplierList () {
-      var materialUrl = encodeURI(this.HOST + '/suppliers')
-      this.$http(materialUrl).then(res => {
-        this.supplierOptions = res.data
-      })
-    },
     addProgress () {
-      var materialUrl = encodeURI(this.HOST + '/progress')
+      var materialUrl = encodeURI(this.HOST + '/order/progress')
       console.log('before post')
       const format = require('date-fns/format')
       this.$http.post(materialUrl, {
         'order_id': this.order_id,
-        'oper_date': format(new Date(), 'YYYY-MM-DD HH:mm:ss'),
+        'op_date': format(new Date(), 'YYYY-MM-DD HH:mm:ss'),
         'operator': '',
         'status': this.status,
-        'new_status': this.new_status,
-        'oper_note': this.oper_note
+        'new_status': this.new_status.value,
+        'note': this.op_note
       }).then(res => {
         var result = res.data
         console.log('try to add a order progress', res.data)
@@ -138,11 +142,11 @@ export default {
     },
     back () {
       this.$router.push({
-        path: './sellorder'
+        path: '../sellorder'
       })
     },
     nameChange (item) {
-      this.new_status = item.value
+      this.new_status = item
     },
     formatDate (value) {
       const format = require('date-fns/format')
@@ -159,9 +163,11 @@ export default {
     },
     getProgressList () {
       console.log('查询进度列表')
-      var materialUrl = this.HOST + '/progress/' + this.order_id
+      this.order_id = this.$route.params.id
+      var materialUrl = this.HOST + '/order/' + this.order_id + '/progress/list'
       this.$http(materialUrl).then(res => {
-        this.progressList = res.data
+        this.progressList = res.data['progress']
+        this.status = res.data['status']
         console.log(this.progressList)
       })
     }

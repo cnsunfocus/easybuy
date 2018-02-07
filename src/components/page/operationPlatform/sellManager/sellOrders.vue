@@ -100,7 +100,7 @@
       </div>
     </div>
   <el-dialog
-    :title="采购明细"
+    title="采购明细"
     :visible.sync="confirmDlg"
     size="tiny">
     <div id="confirmOrder">
@@ -195,35 +195,6 @@
 
   </el-dialog>
 
-<!--
-    <el-dialog
-      :title="采购明细"
-      :visible.sync="orderDetailDlg"
-      size="tiny">
-      <table id="orderDetail" width="100%" border="1" cellpadding="0" cellspacing="0"
-             style= "border:1px solid #000000;border-right-color:#FF0000;">
-        <tr>
-          <th>序号</th>
-          <th>物料名称</th>
-          <th>型号</th>
-          <th>单位</th>
-          <th>数量</th>
-          <th>单价</th>
-          <th>交货期</th>
-          <th>备注</th>
-        </tr>
-        <tr v-for="(item, index) in orderDetail">
-          <td>{{index + 1}}</td>
-          <td>{{item.name}}</td>
-          <td>{{item.standard}}</td>
-          <td>{{item.unit}}</td>
-          <td>{{item.amount}}</td>
-          <td>{{item.price}}</td>
-          <td>{{item.date}}</td>
-          <td>{{item.note}}</td>
-        </tr>
-      </table></el-dialog>
-      -->
   </div>
 
 </template>
@@ -298,7 +269,8 @@ export default {
     },
     addProgress (orderId) {
       this.$router.push({
-        path: '/progress/' + orderId
+        path: '/progress/' + orderId,
+        params: {id: orderId}
       })
     },
     showDetail (order) {
@@ -310,7 +282,7 @@ export default {
         this.confirmInfo.supplier = res.data['supplier']
         this.confirmInfo.buyer = res.data['buyer']
         this.confirmDlg = true
-        console.log('采购明细', res.data)
+        console.log('采购明细1', res.data)
       })
     },
     handleSizeChange (val) {
