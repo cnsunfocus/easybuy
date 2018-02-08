@@ -8,7 +8,7 @@
       <div class="settingtop clrfix">
 
       <div class="orderProgress">
-        <el-select v-model="new_status" value-key="value" placeholder="订单进度状态" @click.native="nameChange(item)">
+        <el-select v-model="new_status" value-key="value" placeholder="订单进度状态" >
           <el-option
             v-for="item in orderStatus"
             :key="item.value"
@@ -120,7 +120,6 @@ export default {
   methods: {
     addProgress () {
       var materialUrl = encodeURI(this.HOST + '/order/progress')
-      console.log('before post')
       const format = require('date-fns/format')
       this.$http.post(materialUrl, {
         'order_id': this.order_id,
@@ -139,14 +138,12 @@ export default {
           })
         }
       })
+      this.getProgressList()
     },
     back () {
       this.$router.push({
         path: '../sellorder'
       })
-    },
-    nameChange (item) {
-      this.new_status = item
     },
     formatDate (value) {
       const format = require('date-fns/format')
@@ -168,7 +165,6 @@ export default {
       this.$http(materialUrl).then(res => {
         this.progressList = res.data['progress']
         this.status = res.data['status']
-        console.log(this.progressList)
       })
     }
   },

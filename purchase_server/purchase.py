@@ -228,13 +228,12 @@ def get_order_progress_list(order_id):
     data = {}
     data['id'] = r[0]
     data['order_id'] = r[1]
-    data['op_date'] = r[2]
+    data['op_date'] = r[2].strftime('%Y-%m-%d %H:%M:%S')
     data['operator'] = r[3]
     data['note'] = r[4]
     data['new_status'] = r[5]
     data['status'] = r[6]
     ret_data.append(data)
-
 
   cur.execute("select status from t_order_list where order_id = '%s'" % order_id)
   ret = cur.fetchone()
@@ -252,7 +251,7 @@ def add_progress():
                          charset=config.db_charset)
   data = json.loads(request.data)
   order_id = data['order_id']
-  op_date = data['op_date']
+  op_date = datetime.datetime.strptime(data['op_date'], '%Y-%m-%d %H:%M:%S')
   operator = data['operator']
   note = data['note']
   new_status = data['new_status']
@@ -261,7 +260,8 @@ def add_progress():
   cur.execute(
     "insert into t_order_progress (order_id, op_date, operator, note, new_status, status) "
     "values ('%s','%s','%s','%s',%s, %s) " % (order_id, op_date, operator, note, new_status, status))
-
+  cur.execute("update t_order_list set status = %s where order_id = '%s'" % (new_status, order_id))
+  conn.commit()
   return "0"
 
 
