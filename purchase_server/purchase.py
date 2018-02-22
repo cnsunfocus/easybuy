@@ -110,6 +110,25 @@ def get_units(name, standard, sp_id):
   return json.dumps(ret_data)
 
 
+@app.route('/api/material/<string:name>/standard/<string:standard>/supplier/<string:sp_id>/unit/<string:unit>')
+def get_price(name, standard, sp_id, unit):
+  conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
+                         charset=config.db_charset)
+  cur = conn.cursor()
+  cur.execute(
+    "select p.price from t_product p"
+    "where p.prod_type='%s' and p.status = '%s' "
+    "and p.prod_name = '%s' and prod_gb_standard = '%s' and p.sp_id = '%s' and p.unit = '%s'"
+    % (u"原料", u"有效", name, standard, sp_id, unit))
+
+  results = cur.fetchone()
+  ret_data = {}
+
+  ret_data["price"] = float(results[0])
+
+  return json.dumps(ret_data)
+
+
 @app.route('/api/order', methods=['POST'])
 def add_order():
   conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,

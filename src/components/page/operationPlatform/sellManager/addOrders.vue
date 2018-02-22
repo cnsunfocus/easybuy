@@ -85,7 +85,7 @@
                             <th>交货期</th>
                             <th>备注</th>
                           </tr>
-                          <tr v-for="(item, index) in materialformdataList">
+                          <tr v-for="(item, index) in formdataList">
                             <td>{{index + 1}}</td>
                             <td>{{item.name}}</td>
                             <td>{{item.type}}</td>
@@ -123,9 +123,9 @@
               :title="dialogTitle"
               :visible.sync="materialDialogStatus"
               size="tiny">
-              <el-form ref="standardform" :model="materialformdata" label-width="100px">
+              <el-form ref="standardform" :model="formdata" label-width="100px">
                 <el-form-item label="名称">
-                  <el-select v-model="materialformdata.name" placeholder="请选择物料">
+                  <el-select v-model="formdata.name" placeholder="请选择物料">
                     <el-option
                       v-for="item in materialNameOptions"
                       @click.native="nameChange(item)"
@@ -137,7 +137,7 @@
                 </el-form-item>
 
                 <el-form-item label="型号">
-                  <el-select v-model="materialformdata.type" placeholder="请选择物料型号">
+                  <el-select v-model="formdata.type" placeholder="请选择物料型号">
                     <el-option
                       v-for="item in materialTypeOptions"
                       @click.native="typeChange(item)"
@@ -149,7 +149,7 @@
                 </el-form-item>
 
                 <el-form-item label="单位">
-                  <el-select v-model="materialformdata.unit" placeholder="请选择单位">
+                  <el-select v-model="formdata.unit" placeholder="请选择单位">
                     <el-option
                       v-for="item in materialUnitOptions"
                       :key="item.code"
@@ -160,19 +160,12 @@
                 </el-form-item>
 
                 <el-form-item label="数量">
-                  <el-input type="number" step="100" v-model="materialformdata.amount" placeholder="请填写物料数量" ></el-input>
+                  <el-input type="number" step="100" v-model="formdata.amount" placeholder="请填写物料数量" ></el-input>
                 </el-form-item>
 
-                <el-form-item label="单价">
-                  <el-input type="number" step="0.01"
-                            v-model="materialformdata.price"
-                            @change="checkNo(materialformdata.price)"
-                            onkeypress="return event.keyCode>=48&&event.keyCode<=57"
-                            placeholder="请填写单价"></el-input>
-                </el-form-item>
                 <el-form-item label="交货期">
                   <el-date-picker
-                    v-model="materialformdata.date"
+                    v-model="formdata.date"
                     type="date"
                     format="yyyy-MM-dd"
                     placeholder="请选择交货日期"
@@ -180,7 +173,7 @@
                   </el-date-picker>
                 </el-form-item>
                 <el-form-item label="备注">
-                  <el-input v-model="materialformdata.note" placeholder="请填写备注信息" ></el-input>
+                  <el-input v-model="formdata.note" placeholder="请填写备注信息" ></el-input>
                 </el-form-item>
               </el-form>
               <span slot="footer" class="dialog-footer">
@@ -194,7 +187,7 @@
               :visible.sync="printDialogStatus"
               size="tiny">
 
-              <el-form ref="standardform" :model="materialformdata" label-width="100px">
+              <el-form ref="standardform" :model="formdata" label-width="100px">
                 <el-form-item></el-form-item>
               </el-form>
             </el-dialog>
@@ -215,8 +208,8 @@ export default {
       printDialogTitle: '确认采购订单',
       printDialogStatus: false,
       supplier: {},
-      materialformdataList: [],
-      materialformdata: {
+      formdataList: [],
+      formdata: {
         code: '',
         id: '',
         name: '',
@@ -250,9 +243,9 @@ export default {
     },
     addOrder () {
       var materialUrl = encodeURI(this.HOST + '/order')
-      console.log('before post', this.materialformdataList)
+      console.log('before post', this.formdataList)
       this.$http.post(materialUrl, {
-        data: this.materialformdataList,
+        data: this.formdataList,
         'supplier': this.supplier,
         'order_id': this.order_id,
         'order_date': this.order_date,
@@ -273,12 +266,12 @@ export default {
       })
     },
     addMaterialConfirm () {
-      var dt = this.materialformdata.date
+      var dt = this.formdata.date
       const format = require('date-fns/format')
-      this.materialformdata.date = format(dt, 'YYYY-MM-DD')
-      this.materialformdataList.push(this.materialformdata)
+      this.formdata.date = format(dt, 'YYYY-MM-DD')
+      this.formdataList.push(this.formdata)
       this.materialDialogStatus = false
-      this.materialformdata = { 'amount': 1 }
+      this.formdata = { 'amount': 1 }
       console.log('try to add a material')
     },
     back () {
@@ -288,7 +281,7 @@ export default {
     },
     clearOrder (item) {
       alert('切换供应商将清空当前采购单')
-      this.materialformdataList = []
+      this.formdataList = []
       this.supplier = item
     },
     nameChange (item) {
@@ -298,10 +291,18 @@ export default {
       })
     },
     typeChange (item) {
-      var materialUrl = encodeURI(this.HOST + '/material/' + this.materialformdata.name +
+      var materialUrl = encodeURI(this.HOST + '/material/' + this.formdata.name +
         '/standard/' + item +
         '/supplier/' + this.supplier.sp_id)
-      this.materialTypeOptions
+      this.$http(materialUrl).then(res => {
+        console.log(res.data)
+        this.materialUnitOptions = res.data['unit']
+        console.log(this.materialNameOptions)
+      })
+    },
+    unitChange (item) {
+      var materialUrl = encodeURI(this.HOST + '/material/' + this.formdata.name +
+        '/standard/' + item + '/supplier/' + this.supplier.sp_id + '/unit/' + this.formdata.unit.code)
       this.$http(materialUrl).then(res => {
         console.log(res.data)
         this.materialUnitOptions = res.data['unit']
@@ -327,7 +328,7 @@ export default {
       value = value.replace(/\.{2,}/g, '.')
       value = value.replace('.', '$#$').replace(/\./g, '').replace('$#$', '.')
       value = value.replace(/^(\\-)*(\d+)\.(\d\d).*$/, '$1$2.$3')
-      this.materialformdata.price = value
+      this.formdata.price = value
     },
 //    myNumberic (obj) {
 //    function onlyNumber1(input, n) {
@@ -384,7 +385,7 @@ export default {
       })
     },
     deleteItem (index, row) {
-      this.materialformdataList.remove(index)
+      this.formdataList.remove(index)
       console.log(index, row, '删除')
     },
     getOrderList () {
