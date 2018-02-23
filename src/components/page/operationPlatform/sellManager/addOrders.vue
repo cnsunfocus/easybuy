@@ -6,23 +6,23 @@
     </div>
     <div class="settingbox">
       <div class="settingtop clrfix">
-
+        <div class="choosestatus">
+          <!-- 订单状态选择框 -->
+          <el-select v-model="supplier" value-key="sp_id" placeholder="供应商列表" style="width:280px">
+            <el-option
+              @click.native="clearOrder(item)"
+              v-for="item in supplierOptions"
+              :key="item.sp_id"
+              :label="item.sp_name"
+              :value="item">
+            </el-option>
+          </el-select>
+        </div>
       <div class="ordersearchbox">
           <el-button type="primary" icon="search" @click='addMaterial()'>添加原料</el-button>
           <el-button type="primary" icon="search" @click='addOrder()'>确认下单</el-button>
       </div>
-        <div class="choosestatus">
-          <!-- 订单状态选择框 -->
-          <el-select v-model="supplier" value-key="sp_id" placeholder="供应商列表">
-            <el-option
-            @click.native="clearOrder(item)"
-            v-for="item in supplierOptions"
-            :key="item.sp_id"
-            :label="item.sp_name"
-            :value="item">
-          </el-option>
-        </el-select>
-      </div>
+
       <div class="ordersearchbox">
         <el-button type="primary" class="addsort" icon="search" @click='back()'>返回</el-button>
       </div>
@@ -313,7 +313,7 @@ export default {
       })
     },
     deleteMaterial (index) {
-      this.formdata.splice(index, 1)
+      this.formdataList.splice(index, 1)
     },
     formatDate (value) {
       const format = require('date-fns/format')
@@ -469,7 +469,7 @@ export default {
   .settingtop{
     padding: 15px 0;
     .choosestatus{
-      width: 148px;
+      width: 300px;
       margin-right: 7px;
       float: left;
     }

@@ -168,7 +168,7 @@
                   <td >{{item.unit}}</td>
                   <td>{{item.amount}}</td>
                   <td v-if="!editFlag">{{item.price}}</td>
-                  <td v-if="editFlag"><input :value="item.price"></input></td>
+                  <td v-if="editFlag"><input :value="item.price" style="width:20px"></input></td>
                   <td>{{item.date}}</td>
                   <td>{{item.note}}</td>
                 </tr>
@@ -189,14 +189,15 @@
           <input type="text">审核: </input>
           <label>供应商(签章):</label>
         </div>
-        
+
       </div>
-      
+
     </div>
     <div id="orderOperation">
-      <el-button type="primary" icon="search" @click='saveEditPrice()'>保存</el-button>
+      <el-button type="primary" id="editBtn" is-disabled="" icon="search" @click='editPrice()'>修改</el-button>
+      <el-button type="primary" id="saveBtn" is-disabled="" icon="search" @click='savePrice()'>保存</el-button>
       <el-button type="primary" icon="search" @click='printOrder()'>打印</el-button>
-  
+
     </div>
 
   </el-dialog>
@@ -213,7 +214,7 @@ export default {
   components: {ElDialog},
   data () {
     return {
-      editFlag: true,
+      editFlag: false,
       purchaseOrderDialog: false,
       confirmDlg: false,
       orderOptions: [{
@@ -315,7 +316,18 @@ export default {
         console.log(map)
       }, 100)
     },
-    saveEditPrice () {
+    savePrice () {
+      var btn = document.getElementById('saveBtn')
+      console.log('test', btn)
+      btn.setAttribute('is-disabled', 'true')
+      this.editFlag = false
+      btn.setAttribute('is-disabled', '')
+    },
+    editPrice () {
+      var btn = document.getElementById('saveBtn')
+      console.log('test', btn)
+      btn.setAttribute('is-disabled', 'true')
+      this.editFlag = true
       console.log('修改价格', this.formdata)
     },
     printOrder () {
