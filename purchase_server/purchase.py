@@ -115,11 +115,12 @@ def get_price(name, standard, sp_id, unit):
   conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
                          charset=config.db_charset)
   cur = conn.cursor()
-  cur.execute(
-    "select p.price from t_product p"
-    "where p.prod_type='%s' and p.status = '%s' "
-    "and p.prod_name = '%s' and prod_gb_standard = '%s' and p.sp_id = '%s' and p.unit = '%s'"
-    % (u"原料", u"有效", name, standard, sp_id, unit))
+  sql = "select p.price from t_product p " \
+        "where p.prod_type='%s' and p.status = '%s' and p.prod_name = '%s' " \
+        "and p.prod_gb_standard = '%s' and p.sp_id = '%s' and p.unit = '%s'" \
+        % (u"原料", u"有效", name, standard, sp_id, unit)
+
+  cur.execute(sql)
 
   results = cur.fetchone()
   ret_data = {}

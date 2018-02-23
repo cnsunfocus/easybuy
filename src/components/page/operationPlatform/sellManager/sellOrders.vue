@@ -100,7 +100,7 @@
       </div>
     </div>
   <el-dialog
-    title="采购明细"
+    title="采购审核"
     :visible.sync="confirmDlg"
     size="tiny">
     <div id="confirmOrder">
@@ -189,8 +189,14 @@
           <input type="text">审核: </input>
           <label>供应商(签章):</label>
         </div>
+        
       </div>
-
+      
+    </div>
+    <div id="orderOperation">
+      <el-button type="primary" icon="search" @click='saveEditPrice()'>保存</el-button>
+      <el-button type="primary" icon="search" @click='printOrder()'>打印</el-button>
+  
     </div>
 
   </el-dialog>
@@ -308,6 +314,19 @@ export default {
         })
         console.log(map)
       }, 100)
+    },
+    saveEditPrice () {
+      console.log('修改价格', this.formdata)
+    },
+    printOrder () {
+      let subOutputRankPrint = document.getElementById('confirmOrder')
+      console.log(subOutputRankPrint.innerHTML)
+      let newContent = subOutputRankPrint.innerHTML
+      let oldContent = document.body.innerHTML
+      document.body.innerHTML = newContent
+      window.print()
+      window.location.reload()
+      document.body.innerHTML = oldContent
     },
     getOrderList () {
       console.log('交易状态', this.chooseOrderItem)

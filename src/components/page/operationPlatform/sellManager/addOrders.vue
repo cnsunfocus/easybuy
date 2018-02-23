@@ -86,7 +86,9 @@
                             <th>备注</th>
                           </tr>
                           <tr v-for="(item, index) in formdataList">
-                            <td>{{index + 1}}</td>
+                            <td>
+                            <el-button type="primary" icon="search" @click.native='deleteMaterial(index)'>删除</el-button>
+                            {{index + 1}}</td>
                             <td>{{item.name}}</td>
                             <td>{{item.type}}</td>
                             <td>{{item.unit.desc}}</td>
@@ -151,6 +153,7 @@
                 <el-form-item label="单位">
                   <el-select v-model="formdata.unit" placeholder="请选择单位">
                     <el-option
+                      @click.native="unitChange(item)"
                       v-for="item in materialUnitOptions"
                       :key="item.code"
                       :label="item.desc"
@@ -302,12 +305,15 @@ export default {
     },
     unitChange (item) {
       var materialUrl = encodeURI(this.HOST + '/material/' + this.formdata.name +
-        '/standard/' + item + '/supplier/' + this.supplier.sp_id + '/unit/' + this.formdata.unit.code)
+        '/standard/' + this.formdata.type + '/supplier/' + this.supplier.sp_id +
+        '/unit/' + this.formdata.unit.code)
       this.$http(materialUrl).then(res => {
         console.log(res.data)
-        this.materialUnitOptions = res.data['unit']
-        console.log(this.materialNameOptions)
+        this.formdata.price = res.data['price']
       })
+    },
+    deleteMaterial (index) {
+      this.formdata.splice(index, 1)
     },
     formatDate (value) {
       const format = require('date-fns/format')
