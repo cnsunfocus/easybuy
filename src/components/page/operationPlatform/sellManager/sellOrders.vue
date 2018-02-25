@@ -92,10 +92,10 @@
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="curPage"
-          :page-sizes="[10, 20]"
+          :page-sizes="[10, 20, 50]"
           :page-size="curCount"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="400">
+          :total="totlRecords">
         </el-pagination>
       </div>
     </div>
@@ -207,7 +207,6 @@
 </template>
 
 <script>
-import qs from 'querystring'
 import AMap from 'AMap'
 import ElDialog from '../../../../../node_modules/element-ui/packages/dialog/src/component'
 export default {
@@ -257,6 +256,7 @@ export default {
       ordernum: '',
       curCount: 10,
       curPage: 1,
+      totalRecords: 0,
       // 表格数据
       orderList: [],
       orderDetail: [],
@@ -343,13 +343,14 @@ export default {
     getOrderList () {
       console.log('交易状态', this.chooseOrderItem)
       var orderListUrl = this.HOST + '/order/list'
-      this.$http.post(orderListUrl, qs.stringify({
+      this.$http.post(orderListUrl, {
         status: this.chooseOrderItem,
         count: this.curCount,
         page: this.curPage
-      })).then(res => {
+      }).then(res => {
         console.log('获取订单列表', res.data)
-        this.orderList = res.data
+        this.orderList = res.data['data']
+        this.totalRecords = res.data['count']
       })
     }
   },

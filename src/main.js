@@ -15,7 +15,7 @@ import '../static/UE/ueditor.parse.min.js'
 Vue.prototype.$http = axios.create({})
 
 Vue.config.productionTip = false
-Vue.prototype.HOST = '/api'
+Vue.prototype.HOST = '/api/njrkgy'
 // Vue.prototype.HOST = ''
 // 时间戳日期相互装换
 Vue.prototype.transformTime = function (timestamp) {
