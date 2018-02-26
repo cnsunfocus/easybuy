@@ -318,8 +318,14 @@ export default {
     },
     savePrice () {
       var btn = document.getElementById('saveBtn')
-      console.log('test', btn)
+      console.log('更新价格1', btn)
       btn.setAttribute('is-disabled', 'true')
+      var orderListUrl = this.HOST + '/order'
+      this.$http.put(orderListUrl, {
+        data: this.orderDetail
+      }).then(res => {
+        console.log('更新价格2', res.data)
+      })
       this.editFlag = false
       btn.setAttribute('is-disabled', '')
     },

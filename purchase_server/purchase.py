@@ -156,6 +156,22 @@ def add_order():
   return "0"
 
 
+@app.route('/api/order', methods=['PUT'])
+def update_order():
+  conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
+                         charset=config.db_charset)
+  data = json.loads(request.data)
+  material_list = data['data']
+
+  cur = conn.cursor()
+
+  for m in material_list:
+    cur.execute(
+      "update t_order_detail set price = %s where id = %s" % (m['price'], m['id']))
+  conn.commit()
+  return "0"
+
+
 @app.route('/api/order/list', methods=['POST'])
 def get_order_list():
   conn = MySQLdb.connect(host=config.db_server, user=config.db_user, passwd=config.db_passwd, db=config.db_name,
