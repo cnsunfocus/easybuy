@@ -149,6 +149,51 @@
           </tr>
           <tr style = "boder:1px">
             <td colspan="4">
+              <el-table height='520'
+                        :data="orderDetail"
+                        border
+                        >
+                <el-table-column
+                  label="序号"
+                  width="60">
+                  <template slot-scope="scope">
+                    <span>{{scope.$index + 1}} </span>
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="name"
+                  label="物料名称"
+                  width="100">
+                </el-table-column>
+                <el-table-column
+                  prop="standard"
+                  label="型号">
+                </el-table-column>
+                <el-table-column
+                  prop="unit"
+                  label="单位">
+                </el-table-column>
+                <el-table-column
+                  prop="amount"
+                  label="数量">
+                </el-table-column>
+                <el-table-column
+                  label="单价">
+                  <template slot-scope="scope">
+                    <el-input v-if="editFlag" v-model="scope.row.price" ></el-input>
+                    <span v-if="!editFlag">{{scope.row.price}} </span>
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="date"
+                  label="交货期">
+                </el-table-column>
+                <el-table-column
+                  prop="note"
+                  label="备注">
+                </el-table-column>
+              </el-table>
+              <!--
               <table id="confirmDetail" width="100%" border="1" cellpadding="0" cellspacing="0"
                      style= "border:1px solid #000000;border-right-color:#FF0000;">
                 <tr>
@@ -173,6 +218,7 @@
                   <td>{{item.note}}</td>
                 </tr>
               </table>
+              -->
             </td>
           </tr>
           <tr style = "boder:1px">
@@ -184,6 +230,7 @@
             </td>
           </tr>
         </table>
+        
         <div id="orderFooter">
           <input type="text">采购: </input>
           <input type="text">审核: </input>
