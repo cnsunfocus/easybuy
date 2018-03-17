@@ -35,7 +35,7 @@ def aft_request(response):
         write_log(s_msg)
     if g_detail_log and g_log:
         s_msg = '%s[%2.2fs],%d req body=%s, res body=%s' % (msg, t_span, res_code, req_body, res_body)
-        print s_msg
+        #print s_msg
         write_detail_log(s_msg)
     return response
 
@@ -212,13 +212,13 @@ def get_units(tenant_id, name, standard, sp_id):
 
 @hg_app.route('/api/<tenant_id>/material/<string:name>/standard/<string:standard>/supplier/<string:sp_id>/unit/<string:unit>')
 def get_price(tenant_id, name, standard, sp_id, unit):
-  conn = MySQLdb.connect(host=db_host, user='root', passwd=db_pwd, db='njrkgy',
+  conn = MySQLdb.connect(host=db_host, user='root', passwd=db_pwd, db=tenant_id,
                          charset='utf8')
   cur = conn.cursor()
   sql = "select p.price from t_product p " \
-        "where p.prod_type='%s' and p.status = '%s' and p.prod_name = '%s' " \
+        "where p.prod_type not in ('半成品','产品')  and p.status = '%s' and p.prod_name = '%s' " \
         "and p.prod_gb_standard = '%s' and p.sp_id = '%s' and p.unit = '%s'" \
-        % (u"原料", u"有效", name, standard, sp_id, unit)
+        % (u"有效", name, standard, sp_id, unit)
 
   cur.execute(sql)
 
@@ -240,7 +240,7 @@ def add_order(tenant_id):
 
 @hg_app.route('/api/<tenant_id>/order', methods=['PUT'])
 def update_order(tenant_id):
-  conn = MySQLdb.connect(host=db_host, user='root', passwd=db_pwd, db='njrkgy',
+  conn = MySQLdb.connect(host=db_host, user='root', passwd=db_pwd, db=tenant_id,
                          charset='utf8')
   data = json.loads(request.data)
   material_list = data['data']
@@ -297,6 +297,31 @@ def post_progress(tenant_id):
         ret_content, status = add_progress(request_params)
         ret_content = ret_content.encode()
         return ret_content, status
+
+
+
+@hg_app.route('/api/<tenant_id>/baseinfo')
+def get_baseinfo(tenant_id):
+    request_params = request.json if request.data else {}
+    request_params['tenant_id'] = tenant_id
+    conn = MySQLdb.connect(host=db_host, user='root', passwd=db_pwd, db='njrkgy',
+                           charset='utf8')
+
+    cur = conn.cursor()
+    sql = "select id,value,descp from t_base_info "
+
+    cur.execute(sql)
+
+    results = cur.fetchall()
+    ret = {}
+    for r in results:
+      ret_data = {}
+      ret_data["value"] = r[1]
+      ret_data["descp"] = r[2]
+      ret[r[0]] = ret_data
+
+    return json.dumps(ret)
+
 
 '''
 if __name__ == "__main__":

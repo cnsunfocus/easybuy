@@ -81,7 +81,7 @@
            label="操作">
            <template slot-scope="scope">
              <span class="bluebtn"  @click="addProgress(scope.row.order_id)">进度</span>
-             <span class="bluebtn" @click="showDetail(scope.row)">审核</span>
+             <span v-if="isAuthed" class="bluebtn" @click="showDetail(scope.row)">审核</span>
            </template>
          </el-table-column>
        </el-table>
@@ -103,7 +103,7 @@
     title="采购审核"
     :visible.sync="confirmDlg"
     size="tiny">
-    <div id="confirmOrder">
+    <div id="confirmOrder" width="800px">
       <h1 align = "center">采购单</h1>
       <br></br>
       <div>
@@ -118,7 +118,7 @@
             <td>计划单:</td>
             <td>{{}}</td>
             <td>订购方:</td>
-            <td>南京柔科</td>
+            <td>{{baseInfo.comp_name.value}}</td>
           </tr>
           <tr style = "boder:1px">
             <td>供应商:</td>
@@ -130,7 +130,7 @@
             <td>联系人:</td>
             <td>{{confirmInfo.supplier.contact}}</td>
             <td>联系人:</td>
-            <td>史辉</td>
+            <td>{{baseInfo.comp_purchase.value}}</td>
           </tr>
           <tr style = "boder:1px">
             <td>电话:</td>
@@ -148,8 +148,9 @@
             <td  colspan="4">订购内容:</td>
           </tr>
           <tr style = "boder:1px">
-            <td colspan="4">
-              <el-table height='520'
+            <td colspan="4" >
+              <div style="width:100%">
+              <el-table
                         :data="orderDetail"
                         border
                         >
@@ -163,7 +164,7 @@
                 <el-table-column
                   prop="name"
                   label="物料名称"
-                  width="100">
+                  >
                 </el-table-column>
                 <el-table-column
                   prop="standard"
@@ -193,6 +194,7 @@
                   label="备注">
                 </el-table-column>
               </el-table>
+              </div>
               <!--
               <table id="confirmDetail" width="100%" border="1" cellpadding="0" cellspacing="0"
                      style= "border:1px solid #000000;border-right-color:#FF0000;">
@@ -312,7 +314,9 @@ export default {
         order_date: '',
         supplier: {},
         buyer: {}
-      }
+      },
+      baseInfo: {},
+      isAuthed: false
     }
   },
   methods: {
@@ -393,6 +397,17 @@ export default {
       window.location.reload()
       document.body.innerHTML = oldContent
     },
+    getPermission () {
+      console.log('获取用户权限')
+      var permissionUrl = '/n/api/accounts/1/ops/_relation:purchase:edit'
+      this.$http(permissionUrl).then(res => {
+        console.log('登录用户操作授权', res.data)
+        var r = res.data['result']
+        if (r === 'true') {
+          this.isAuthed = true
+        }
+      })
+    },
     getOrderList () {
       console.log('交易状态', this.chooseOrderItem)
       var orderListUrl = this.HOST + '/order/list'
@@ -405,10 +420,20 @@ export default {
         this.orderList = res.data['data']
         this.totalRecords = res.data['count']
       })
+    },
+    getBaseInfo () {
+      console.log('获取基本信息')
+      var materialUrl = this.HOST + '/baseinfo'
+      this.$http(materialUrl).then(res => {
+        this.baseInfo = res.data
+        console.log(this.baseInfo)
+      })
     }
   },
   mounted () {
     this.getOrderList()
+    this.getPermission()
+    this.getBaseInfo()
   }
 }
 </script>

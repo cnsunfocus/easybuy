@@ -933,7 +933,9 @@ def get_material_by_sp(request_params):
     try:
         cnn = MySQLdb.connect(db_host, "root", db_pwd, db_name, charset='utf8')
         cur = cnn.cursor()
-        str_sql = "select distinct(prod_name) from t_product where prod_type='原料' and status = '有效' and sp_id = '%s'" % sp_id
+
+        str_sql = "select distinct prod_name from t_product where status='有效' and prod_type not in ('半成品','产品') and sp_id = '%s' order by code asc" % sp_id
+        #str_sql = "select distinct(prod_name) from t_product where prod_type='原料' and status = '有效' and sp_id = '%s'" % sp_id
         cur.execute(str_sql)
         data = cur.fetchall()
         js_res = []
@@ -970,8 +972,10 @@ def get_standards(request_params):
     try:
         cnn = MySQLdb.connect(db_host, "root", db_pwd, db_name, charset='utf8')
         cur = cnn.cursor()
-        str_sql = "select DISTINCT(prod_gb_standard) from t_product p where p.prod_type='原料' and p.status = '有效' " \
-                  "and p.prod_name = '%s' and sp_id = '%s'" % (name, sp_id)
+        str_sql = "select DISTINCT(prod_gb_standard) from t_product p where p.prod_type not in ('半成品','产品') and p.status = '有效' " \
+                 "and p.prod_name = '%s' and sp_id = '%s'" % (name, sp_id)
+        #str_sql = "select DISTINCT(prod_gb_standard) from t_product p where p.prod_type='原料' and p.status = '有效' " \
+        #          "and p.prod_name = '%s' and sp_id = '%s'" % (name, sp_id)
         cur.execute(str_sql)
         data = cur.fetchall()
         js_res = []
@@ -1012,9 +1016,9 @@ def get_all_units(request_params):
         cur = cnn.cursor()
         cur.execute(
           "select p.unit, u.desc from t_product p, t_unit u "
-          "where p.prod_type='%s' and p.status = '%s' "
+          "where p.prod_type not in ('半成品','产品') and p.status = '%s' "
           "and p.prod_name = '%s' and prod_gb_standard = '%s' and u.code = p.unit and p.sp_id = '%s'"
-          % (u"原料", u"有效", name, standard, sp_id))
+          % (u"有效", name, standard, sp_id))
 
         results = cur.fetchall()
         ret_data = {}
@@ -1074,9 +1078,9 @@ def post_order(request_params):
                                                            js_req['phone'], js_req['fax'], js_req['email'])
         cur.execute(str_sql)
         for m in material_list:
-            str_sql = "insert into t_order_detail (order_id, material, price, amount, standard, note) values ('%s'," \
-                      "'%s', %s, %s, '%s', '%s')" % (js_req['order_id'], m['name'], m['price'], m['amount'],
-                                                     m['type'], m['note'])
+            str_sql = "insert into t_order_detail (order_id, material, price, amount, standard, note, recv_date) values ('%s'," \
+                      "'%s', %s, %s, '%s', '%s', '%s')" % (js_req['order_id'], m['name'], m['price'], m['amount'],
+                                                     m['type'], m['note'], m['date'])
             cur.execute(str_sql)
         cnn.commit()
         status = 201
@@ -1119,7 +1123,7 @@ def get_orders(request_params):
         cur = cnn.cursor()
         str_sql = "select o.id, o.order_id, o.supplier, o.sp_contact, o.sp_phone, o.status, d.material as name, " \
                   "sum(d.price * d.amount) as totalPrice, o.order_date  from t_order_list o, t_order_detail d where " \
-                  "o.order_id = d.order_id limit %d, %d" % (start_idx, cur_count)
+                  "o.order_id = d.order_id  group by d.order_id limit %d, %d" % (start_idx, cur_count)
         cur.execute(str_sql)
         data = cur.fetchall()
 
@@ -1204,7 +1208,7 @@ def get_od(request_params):
         status = 200
         return return_string, status
     except Exception, e:
-        traceback.print_exc()
+        #traceback.print_exc()
         cnn.rollback()
         js_res['info'] = e.message
         return_string = json.dumps(js_res)

@@ -40,27 +40,27 @@
                      </tr>
                     <tr style = "boder:1px">
                       <td>计划单:</td>
-                      <td>{{}}</td>
+                      <td></td>
                       <td>订购方:</td>
-                      <td>南京柔科</td>
+                      <td>{{baseInfo.comp_name.value}}</td>
                     </tr>
                     <tr style = "boder:1px">
                       <td>供应商:</td>
                       <td>{{supplier.sp_name}}</td>
                       <td>地址:</td>
-                      <td>{{addr}}</td>
+                      <td>{{baseInfo.comp_addr.value}}</td>
                     </tr>
                     <tr style = "boder:1px">
                       <td>联系人:</td>
                       <td>{{supplier.sp_contact}}</td>
                       <td>联系人:</td>
-                      <td>史辉</td>
+                      <td>{{baseInfo.comp_purchase.value}}</td>
                     </tr>
                     <tr style = "boder:1px">
                       <td>电话:</td>
                       <td>{{supplier.sp_phone}}</td>
                       <td>电话:</td>
-                      <td>{{phone}}</td>
+                      <td>{{baseInfo.comp_purchase_phone.value}}</td>
                     </tr>
                     <tr style = "boder:1px">
                       <td>传真:</td>
@@ -234,7 +234,8 @@ export default {
       materialNameOptions: [],
       materialTypeOptions: [],
       materialSpOptions: [],
-      materialUnitOptions: []
+      materialUnitOptions: [],
+      baseInfo: {}
     }
   },
   methods: {
@@ -396,60 +397,14 @@ export default {
     },
     getOrderList () {
       console.log('交易状态', this.chooseOrderItem)
-//      var orderListUrl = this.HOST + '/order/list'
-//      this.$http(orderListUrl, qs.stringify({
-//        status: this.chooseOrderItem,
-//        tradeId: this.ordernum,
-//        count: this.curCount,
-//        page: this.curPage
-//      })).then(res => {
-//        console.log(res.data.list)
-//        this.materialNameOptions = res.data.list
-//        for (var i = 0; i < this.materialNameOptions.length; i++) {
-//          if (this.materialNameOptions[i].status < 2) {
-//            this.materialNameOptions[i].transport = '待发货'
-//          } else if (this.materialNameOptions[i].status >= 2 && this.materialNameOptions[i].status < 5) {
-//            this.materialNameOptions[i].transport = '已发货'
-//          } else if (this.materialNameOptions[i].status === 5) {
-//            this.materialNameOptions[i].transport = '交易关闭'
-//          } else if (this.materialNameOptions[i].status === 6) {
-//            this.materialNameOptions[i].transport = '退货中'
-//          } else if (this.materialNameOptions[i].status === 7) {
-//            this.materialNameOptions[i].transport = '退货中'
-//          } else if (this.materialNameOptions[i].status === 8) {
-//            this.materialNameOptions[i].transport = '退款成功'
-//          }
-//          switch (this.materialNameOptions[i].status) {
-//            case 0:
-//              this.materialNameOptions[i].status = '待付款'
-//              break
-//            case 1:
-//              this.materialNameOptions[i].status = '待发货'
-//              break
-//            case 2:
-//              this.materialNameOptions[i].status = '待收货'
-//              break
-//            case 3:
-//              this.materialNameOptions[i].status = '待评价'
-//              break
-//            case 4:
-//              this.materialNameOptions[i].status = '已完成'
-//              break
-//            case 5:
-//              this.materialNameOptions[i].status = '交易关闭'
-//              break
-//            case 6:
-//              this.materialNameOptions[i].status = '退货中'
-//              break
-//            case 7:
-//              this.materialNameOptions[i].status = '退款中'
-//              break
-//            case 8:
-//              this.materialNameOptions[i].status = '退款成功'
-//              break
-//          }
-//        }
-//      })
+    },
+    getBaseInfo () {
+      console.log('获取基本信息')
+      var materialUrl = this.HOST + '/baseinfo'
+      this.$http(materialUrl).then(res => {
+        this.baseInfo = res.data
+        console.log(this.baseInfo)
+      })
     }
   },
   mounted () {
@@ -457,6 +412,7 @@ export default {
     this.order_date = form(new Date(), 'YYYY-MM-DD')
     this.order_id = form(new Date(), 'YYYYMMDDHHmmss')
     this.getSupplierList()
+    this.getBaseInfo()
   }
 }
 </script>
